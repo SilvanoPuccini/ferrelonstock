@@ -14,11 +14,34 @@
 
     <div class="flex items-center justify-between mb-8">
         <h1 class="text-2xl font-bold text-gray-900">{% trans "Pedido" %} #{{ order.pk }}</h1>
-        <span class="bg-{{ order.status_color }}-50 text-{{ order.status_color }}-700 px-4 py-2 rounded-full text-sm font-medium">{{ order.get_status_display }}</span>
+        <div class="flex items-center gap-2">
+            {% if order.payment_status == 'paid' %}
+                <span class="bg-green-50 text-green-700 px-3 py-1.5 rounded-full text-xs font-medium">💳 {% trans "Pagado" %}</span>
+            {% elif order.payment_status == 'unpaid' %}
+                <span class="bg-yellow-50 text-yellow-700 px-3 py-1.5 rounded-full text-xs font-medium">💳 {% trans "Pago pendiente" %}</span>
+            {% elif order.payment_status == 'failed' %}
+                <span class="bg-red-50 text-red-700 px-3 py-1.5 rounded-full text-xs font-medium">💳 {% trans "Pago fallido" %}</span>
+            {% elif order.payment_status == 'refunded' %}
+                <span class="bg-purple-50 text-purple-700 px-3 py-1.5 rounded-full text-xs font-medium">💳 {% trans "Reembolsado" %}</span>
+            {% endif %}
+
+            {% if order.status == 'preparing' %}
+                <span class="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-xs font-medium">📦 {% trans "En preparación" %}</span>
+            {% elif order.status == 'shipped' %}
+                <span class="bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-full text-xs font-medium">🚚 {% trans "Enviado" %}</span>
+            {% elif order.status == 'delivered' %}
+                <span class="bg-green-50 text-green-700 px-3 py-1.5 rounded-full text-xs font-medium">✅ {% trans "Entregado" %}</span>
+            {% elif order.status == 'cancelled' %}
+                <span class="bg-red-50 text-red-700 px-3 py-1.5 rounded-full text-xs font-medium">❌ {% trans "Cancelado" %}</span>
+            {% elif order.status == 'pending' %}
+                <span class="bg-gray-50 text-gray-700 px-3 py-1.5 rounded-full text-xs font-medium">⏳ {% trans "Pendiente" %}</span>
+            {% endif %}
+        </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
+        <!-- Items -->
         <div class="lg:col-span-2 space-y-4">
             {% for item in order.items.all %}
             <div class="flex gap-4 p-4 bg-white rounded-xl border border-gray-200">
@@ -36,8 +59,63 @@
                 <span class="font-bold text-primary-700">${{ item.get_total|floatformat:0 }}</span>
             </div>
             {% endfor %}
+
+            <!-- Sección de mensajes / contacto con vendedor -->
+            <div class="bg-white rounded-xl border border-gray-200 p-6 mt-6">
+                <h2 class="font-semibold text-gray-900 mb-4">💬 {% trans "Contactar al vendedor" %}</h2>
+
+                {% if order_messages %}
+                <div class="space-y-3 mb-6 max-h-80 overflow-y-auto">
+                    {% for msg in order_messages %}
+                    <div class="p-3 rounded-lg {% if msg.is_from_staff %}bg-primary-50 border border-primary-100{% else %}bg-gray-50{% endif %}">
+                        <div class="flex items-center justify-between mb-1">
+                            <div class="flex items-center gap-2">
+                                {% if msg.is_from_staff %}
+                                    <span class="text-xs bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full font-medium">FerrelonStock</span>
+                                {% else %}
+                                    <span class="text-xs text-gray-500 font-medium">{{ msg.sender.first_name|default:msg.sender.email }}</span>
+                                {% endif %}
+                                <span class="text-xs px-2 py-0.5 rounded-full
+                                    {% if msg.message_type == 'complaint' %}bg-red-50 text-red-600
+                                    {% elif msg.message_type == 'question' %}bg-blue-50 text-blue-600
+                                    {% elif msg.message_type == 'suggestion' %}bg-green-50 text-green-600
+                                    {% else %}bg-gray-50 text-gray-600{% endif %}">
+                                    {{ msg.get_message_type_display }}
+                                </span>
+                            </div>
+                            <span class="text-xs text-gray-400">{{ msg.created_at|date:"d/m/Y H:i" }}</span>
+                        </div>
+                        <p class="text-sm font-medium text-gray-900">{{ msg.subject }}</p>
+                        <p class="text-sm text-gray-600 mt-1">{{ msg.body }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <form method="POST" action="{% url 'orders:order_send_message' order.pk %}" class="space-y-3">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">{% trans "Tipo" %}</label>
+                            {{ message_form.message_type }}
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">{% trans "Asunto" %}</label>
+                            {{ message_form.subject }}
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">{% trans "Mensaje" %}</label>
+                        {{ message_form.body }}
+                    </div>
+                    <button type="submit" class="bg-primary-600 text-white text-sm px-6 py-2.5 rounded-lg hover:bg-primary-700 transition font-medium">
+                        {% trans "Enviar mensaje" %}
+                    </button>
+                </form>
+            </div>
         </div>
 
+        <!-- Sidebar -->
         <div class="space-y-6">
             <div class="bg-white rounded-xl border border-gray-200 p-6">
                 <h2 class="font-semibold text-gray-900 mb-4">{% trans "Resumen" %}</h2>
@@ -74,7 +152,7 @@
             </div>
 
             <div class="bg-white rounded-xl border border-gray-200 p-6">
-                <h2 class="font-semibold text-gray-900 mb-4">{% trans "Envío" %}</h2>
+                <h2 class="font-semibold text-gray-900 mb-4">{% trans "Dirección de envío" %}</h2>
                 <div class="text-sm text-gray-600 space-y-1">
                     <p class="font-medium text-gray-900">{{ order.first_name }} {{ order.last_name }}</p>
                     <p>{{ order.address }}</p>
@@ -93,9 +171,19 @@
                 </div>
             </div>
 
-            {% if order.status == "pending" %}
+            {% if order.payment_status == "unpaid" or order.payment_status == "failed" %}
             <a href="{% url 'payments:payment_select' order.pk %}" class="block w-full text-center bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition text-sm">
-                {% trans "Pagar ahora" %}
+                {% if order.payment_status == 'failed' %}
+                    {% trans "Reintentar pago" %}
+                {% else %}
+                    {% trans "Pagar ahora" %}
+                {% endif %}
+            </a>
+            {% endif %}
+
+            {% if order.status == "shipped" or order.status == "delivered" %}
+            <a href="{% url 'shipping:tracking' order.pk %}" class="block w-full text-center bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition text-sm">
+                🚚 {% trans "Seguir envío" %}
             </a>
             {% endif %}
         </div>

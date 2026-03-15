@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Mi perfil" %}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <div class="flex items-center justify-between mb-8">
+        <h1 class="text-2xl font-bold text-gray-900">{% trans "Mi perfil" %}</h1>
+        <a href="{% url 'accounts:profile_edit' %}" class="bg-primary-600 text-white text-sm px-5 py-2 rounded-lg hover:bg-primary-700 transition font-medium">{% trans "Editar" %}</a>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+        <!-- Header con avatar -->
+        <div class="bg-gradient-to-r from-primary-600 to-primary-800 px-6 py-8">
+            <div class="flex items-center gap-5">
+                <div class="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center text-white text-2xl font-bold overflow-hidden flex-shrink-0">
+                    {% if user.profile.avatar %}
+                        <img src="{{ user.profile.avatar.url }}" alt="Avatar" class="w-full h-full object-cover">
+                    {% else %}
+                        {{ user.profile.get_initials }}
+                    {% endif %}
+                </div>
+                <div class="text-white">
+                    <h2 class="text-xl font-bold">
+                        {% if user.first_name %}{{ user.first_name }} {{ user.last_name }}{% else %}{{ user.email }}{% endif %}
+                    </h2>
+                    <p class="text-primary-200 text-sm">{{ user.email }}</p>
+                    <p class="text-primary-200 text-xs mt-1">{% trans "Miembro desde" %} {{ user.date_joined|date:"d/m/Y" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Datos -->
+        <div class="p-6 space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <p class="text-xs text-gray-500 mb-1">{% trans "Teléfono" %}</p>
+                    <p class="font-medium text-gray-900 text-sm">{{ user.profile.phone|default:"—" }}</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <p class="text-xs text-gray-500 mb-1">{% trans "Ciudad" %}</p>
+                    <p class="font-medium text-gray-900 text-sm">{{ user.profile.city|default:"—" }}</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <p class="text-xs text-gray-500 mb-1">{% trans "Dirección" %}</p>
+                    <p class="font-medium text-gray-900 text-sm">{{ user.profile.address|default:"—" }}</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <p class="text-xs text-gray-500 mb-1">{% trans "Región" %}</p>
+                    <p class="font-medium text-gray-900 text-sm">{{ user.profile.region|default:"—" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accesos rápidos -->
+        <div class="border-t border-gray-200 p-6">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <a href="{% url 'orders:order_history' %}" class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                    <span class="text-xl">📦</span>
+                    <span class="text-sm font-medium text-gray-700">{% trans "Mis pedidos" %}</span>
+                </a>
+                <a href="{% url 'accounts:profile_edit' %}" class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                    <span class="text-xl">✏️</span>
+                    <span class="text-sm font-medium text-gray-700">{% trans "Editar perfil" %}</span>
+                </a>
+                <a href="{% url 'account_logout' %}" class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-red-50 transition">
+                    <span class="text-xl">🚪</span>
+                    <span class="text-sm font-medium text-red-600">{% trans "Cerrar sesión" %}</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

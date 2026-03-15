@@ -14,11 +14,49 @@
         <a href="{% url 'orders:order_detail' order.pk %}" class="block bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <div class="flex items-center gap-3 mb-1">
+                    <div class="flex items-center gap-2 mb-2">
                         <span class="font-bold text-gray-900">{% trans "Pedido" %} #{{ order.pk }}</span>
-                        <span class="bg-{{ order.status_color }}-50 text-{{ order.status_color }}-700 px-3 py-1 rounded-full text-xs font-medium">{{ order.get_status_display }}</span>
+
+                        <!-- Badge de pago -->
+                        {% if order.payment_status == 'paid' %}
+                            <span class="bg-green-50 text-green-700 px-2 py-0.5 rounded-full text-xs font-medium">💳 {% trans "Pagado" %}</span>
+                        {% elif order.payment_status == 'unpaid' %}
+                            <span class="bg-yellow-50 text-yellow-700 px-2 py-0.5 rounded-full text-xs font-medium">💳 {% trans "Pago pendiente" %}</span>
+                        {% elif order.payment_status == 'failed' %}
+                            <span class="bg-red-50 text-red-700 px-2 py-0.5 rounded-full text-xs font-medium">💳 {% trans "Pago fallido" %}</span>
+                        {% elif order.payment_status == 'refunded' %}
+                            <span class="bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full text-xs font-medium">💳 {% trans "Reembolsado" %}</span>
+                        {% endif %}
+
+                        <!-- Badge de pedido -->
+                        {% if order.status == 'preparing' %}
+                            <span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full text-xs font-medium">📦 {% trans "En preparación" %}</span>
+                        {% elif order.status == 'shipped' %}
+                            <span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full text-xs font-medium">🚚 {% trans "Enviado" %}</span>
+                        {% elif order.status == 'delivered' %}
+                            <span class="bg-green-50 text-green-700 px-2 py-0.5 rounded-full text-xs font-medium">✅ {% trans "Entregado" %}</span>
+                        {% elif order.status == 'cancelled' %}
+                            <span class="bg-red-50 text-red-700 px-2 py-0.5 rounded-full text-xs font-medium">❌ {% trans "Cancelado" %}</span>
+                        {% elif order.status == 'pending' %}
+                            <span class="bg-gray-50 text-gray-700 px-2 py-0.5 rounded-full text-xs font-medium">⏳ {% trans "Pendiente" %}</span>
+                        {% endif %}
                     </div>
+
                     <p class="text-sm text-gray-500">{{ order.created_at|date:"d/m/Y H:i" }} — {{ order.total_items }} {% trans "items" %}</p>
+
+                    {% if order.status == 'shipped' %}
+                        <span class="text-xs text-blue-600 font-medium mt-1 inline-block">🚚 {% trans "En camino" %} — <span class="underline">{% trans "Seguir envío" %}</span></span>
+                    {% endif %}
+
+                    {% if order.payment_status == 'unpaid' %}
+                        <span class="text-xs text-yellow-600 font-medium mt-1 inline-block">⚠️ {% trans "Completá el pago para procesar tu pedido" %}</span>
+                    {% elif order.payment_status == 'failed' %}
+                        <span class="text-xs text-red-600 font-medium mt-1 inline-block">❌ {% trans "El pago falló — intentá con otro método" %}</span>
+                    {% endif %}
+
+                    {% if order.messages.exists %}
+                        <span class="text-xs text-gray-500 mt-1 inline-block">💬 {{ order.messages.count }} {% trans "mensaje(s)" %}</span>
+                    {% endif %}
                 </div>
                 <span class="text-xl font-bold text-primary-700">${{ order.total|floatformat:0 }}</span>
             </div>

@@ -3,8 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 from decimal import Decimal, InvalidOperation
-from .models import Order, OrderItem
-from .forms import CheckoutForm
+from .models import Order, OrderItem, OrderMessage
+from .forms import CheckoutForm, OrderMessageForm
 from cart.cart import Cart
 from shipping.models import ShippingMethod, ShippingZone
 from shipping.services import get_zones
@@ -24,13 +24,11 @@ def checkout(request):
             order = form.save(commit=False)
             order.user = request.user
 
-            # Envío - parseo seguro
             shipping_method_code = request.POST.get('shipping_method', 'pickup')
             shipping_zone_code = request.POST.get('shipping_zone', '')
 
             try:
-                raw = request.POST.get('shipping_price', '0')
-                raw = raw.strip().replace(',', '.')
+                raw = request.POST.get('shipping_price', '0').strip().replace(',', '.')
                 shipping_price = Decimal(raw) if raw else Decimal('0')
             except (InvalidOperation, ValueError):
                 shipping_price = Decimal('0')
@@ -45,10 +43,8 @@ def checkout(request):
 
             for item in cart:
                 OrderItem.objects.create(
-                    order=order,
-                    product=item['product'],
-                    price=item['price'],
-                    quantity=item['quantity']
+                    order=order, product=item['product'],
+                    price=item['price'], quantity=item['quantity']
                 )
                 product = item['product']
                 product.stock -= item['quantity']
@@ -65,13 +61,16 @@ def checkout(request):
             'first_name': request.user.first_name,
             'last_name': request.user.last_name,
             'email': request.user.email,
+            'phone': request.user.profile.phone,
+            'address': request.user.profile.address,
+            'city': request.user.profile.city,
+            'region': request.user.profile.region,
+            'postal_code': request.user.profile.postal_code,
         }
         form = CheckoutForm(initial=initial)
 
     return render(request, 'orders/checkout.html', {
-        'form': form,
-        'cart': cart,
-        'zones': get_zones(),
+        'form': form, 'cart': cart, 'zones': get_zones(),
     })
 
 
@@ -90,4 +89,27 @@ def order_history(request):
 @login_required
 def order_detail(request, order_id):
     order = get_object_or_404(Order, pk=order_id, user=request.user)
-    return render(request, 'orders/order_detail.html', {'order': order})
+    order_messages = order.messages.all()
+    message_form = OrderMessageForm()
+    return render(request, 'orders/order_detail.html', {
+        'order': order,
+        'order_messages': order_messages,
+        'message_form': message_form,
+    })
+
+
+@login_required
+def order_send_message(request, order_id):
+    order = get_object_or_404(Order, pk=order_id, user=request.user)
+
+    if request.method == 'POST':
+        form = OrderMessageForm(request.POST)
+        if form.is_valid():
+            msg = form.save(commit=False)
+            msg.order = order
+            msg.sender = request.user
+            msg.is_from_staff = False
+            msg.save()
+            messages.success(request, _('Mensaje enviado. Te responderemos pronto.'))
+
+    return redirect('orders:order_detail', order_id=order.pk)
