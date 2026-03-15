@@ -27,7 +27,7 @@
         </div>
 
         <div>
-            <span class="text-sm text-primary-600 font-medium">{{ product.category.name }}</span>
+            <div class="flex items-center gap-3"><span class="text-sm text-primary-600 font-medium">{{ product.category.name }}</span>{% if product.brand %}<span class="text-sm text-gray-400">·</span><a href="{{ product.brand.get_absolute_url }}" class="text-sm text-gray-500 hover:text-primary-600 font-medium">{{ product.brand.name }}</a>{% endif %}</div>
             <h1 class="text-3xl font-bold text-gray-900 mt-2">{{ product.name }}</h1>
 
             <div class="flex items-center gap-4 mt-4">

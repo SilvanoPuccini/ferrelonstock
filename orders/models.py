@@ -33,6 +33,23 @@ class Order(models.Model):
         default='pending'
     )
     notes = models.TextField('Notas del cliente', blank=True)
+    shipping_method = models.ForeignKey(
+        'shipping.ShippingMethod',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        verbose_name='Método de envío'
+    )
+    shipping_zone = models.ForeignKey(
+        'shipping.ShippingZone',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        verbose_name='Zona de envío'
+    )
+    shipping_price = models.DecimalField(
+        'Costo de envío',
+        max_digits=10, decimal_places=2,
+        default=0
+    )
     created_at = models.DateTimeField('Fecha de creación', auto_now_add=True)
     updated_at = models.DateTimeField('Última actualización', auto_now=True)
 
@@ -46,7 +63,8 @@ class Order(models.Model):
 
     @property
     def total(self):
-        return sum(item.get_total for item in self.items.all())
+        items_total = sum(item.get_total for item in self.items.all())
+        return items_total + self.shipping_price
 
     @property
     def total_items(self):

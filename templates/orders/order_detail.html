@@ -48,8 +48,24 @@
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-500">{% trans "Envío" %}</span>
-                        <span class="text-green-600 font-medium">{% trans "Gratis" %}</span>
+                        {% if order.shipping_price > 0 %}
+                            <span>${{ order.shipping_price|floatformat:0 }}</span>
+                        {% else %}
+                            <span class="text-green-600 font-medium">{% trans "Gratis" %}</span>
+                        {% endif %}
                     </div>
+                    {% if order.shipping_method %}
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">{% trans "Método" %}</span>
+                        <span>{{ order.shipping_method.name }}</span>
+                    </div>
+                    {% endif %}
+                    {% if order.shipping_zone %}
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">{% trans "Zona" %}</span>
+                        <span>{{ order.shipping_zone.name }}</span>
+                    </div>
+                    {% endif %}
                     <div class="flex justify-between pt-2 border-t border-gray-200">
                         <span class="font-bold">{% trans "Total" %}</span>
                         <span class="text-xl font-bold text-primary-700">${{ order.total|floatformat:0 }}</span>
@@ -75,13 +91,13 @@
                     <p>{% trans "Email" %}: {{ order.email }}</p>
                     {% if order.notes %}<p>{% trans "Notas" %}: {{ order.notes }}</p>{% endif %}
                 </div>
+            </div>
 
             {% if order.status == "pending" %}
-            <a href="{% url 'payments:payment_select' order.pk %}" class="block w-full text-center bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition text-sm mt-6">
+            <a href="{% url 'payments:payment_select' order.pk %}" class="block w-full text-center bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition text-sm">
                 {% trans "Pagar ahora" %}
             </a>
             {% endif %}
-            </div>
         </div>
     </div>
 </div>

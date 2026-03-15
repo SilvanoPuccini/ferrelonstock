@@ -2,9 +2,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
+from decimal import Decimal, InvalidOperation
 from .models import Order, OrderItem
 from .forms import CheckoutForm
 from cart.cart import Cart
+from shipping.models import ShippingMethod, ShippingZone
+from shipping.services import get_zones
 
 
 @login_required
@@ -20,6 +23,24 @@ def checkout(request):
         if form.is_valid():
             order = form.save(commit=False)
             order.user = request.user
+
+            # Envío - parseo seguro
+            shipping_method_code = request.POST.get('shipping_method', 'pickup')
+            shipping_zone_code = request.POST.get('shipping_zone', '')
+
+            try:
+                raw = request.POST.get('shipping_price', '0')
+                raw = raw.strip().replace(',', '.')
+                shipping_price = Decimal(raw) if raw else Decimal('0')
+            except (InvalidOperation, ValueError):
+                shipping_price = Decimal('0')
+
+            method = ShippingMethod.objects.filter(code=shipping_method_code).first()
+            zone = ShippingZone.objects.filter(code=shipping_zone_code).first() if shipping_zone_code else None
+
+            order.shipping_method = method
+            order.shipping_zone = zone
+            order.shipping_price = shipping_price
             order.save()
 
             for item in cart:
@@ -29,7 +50,6 @@ def checkout(request):
                     price=item['price'],
                     quantity=item['quantity']
                 )
-                # Descontar stock
                 product = item['product']
                 product.stock -= item['quantity']
                 if product.stock <= 0:
@@ -51,6 +71,7 @@ def checkout(request):
     return render(request, 'orders/checkout.html', {
         'form': form,
         'cart': cart,
+        'zones': get_zones(),
     })
 
 

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Términos y Condiciones" %}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-2xl font-bold text-gray-900 mb-6">{% trans "Términos y Condiciones" %}</h1>
+    <div class="bg-white rounded-xl border border-gray-200 p-8 prose prose-sm max-w-none text-gray-600">
+        <h2 class="text-lg font-semibold text-gray-900">1. {% trans "Generalidades" %}</h2>
+        <p>{% trans "FerrelonStock es una plataforma de comercio electrónico dedicada a la venta de productos de ferretería y materiales de construcción. Al utilizar nuestro sitio web, aceptás estos términos y condiciones." %}</p>
+
+        <h2 class="text-lg font-semibold text-gray-900 mt-6">2. {% trans "Productos y precios" %}</h2>
+        <p>{% trans "Los precios publicados incluyen IVA. Nos reservamos el derecho de modificar precios sin previo aviso. La disponibilidad de productos está sujeta a stock." %}</p>
+
+        <h2 class="text-lg font-semibold text-gray-900 mt-6">3. {% trans "Envíos" %}</h2>
+        <p>{% trans "Los envíos se realizan a todo Chile. Los plazos de entrega son estimativos y pueden variar según la zona. FerrelonStock no se responsabiliza por demoras del servicio de transporte." %}</p>
+
+        <h2 class="text-lg font-semibold text-gray-900 mt-6">4. {% trans "Devoluciones" %}</h2>
+        <p>{% trans "Aceptamos devoluciones dentro de los 10 días hábiles posteriores a la recepción del producto, siempre que se encuentre en su estado original y con el embalaje intacto." %}</p>
+
+        <h2 class="text-lg font-semibold text-gray-900 mt-6">5. {% trans "Pagos" %}</h2>
+        <p>{% trans "Aceptamos pagos a través de Stripe (tarjetas internacionales) y Mercado Pago (tarjetas, transferencias y otros medios de pago locales). Todas las transacciones son procesadas de forma segura." %}</p>
+    </div>
+</div>
+{% endblock %}

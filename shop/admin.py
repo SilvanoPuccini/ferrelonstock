@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Product
+from .models import Category, Brand, Product
 
 
 @admin.register(Category)
@@ -9,10 +9,17 @@ class CategoryAdmin(admin.ModelAdmin):
     search_fields = ['name']
 
 
+@admin.register(Brand)
+class BrandAdmin(admin.ModelAdmin):
+    list_display = ['name', 'slug']
+    prepopulated_fields = {'slug': ('name',)}
+    search_fields = ['name']
+
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['name', 'category', 'price', 'stock', 'available', 'featured', 'created_at']
-    list_filter = ['available', 'featured', 'category', 'created_at']
+    list_display = ['name', 'category', 'brand', 'price', 'stock', 'available', 'featured', 'created_at']
+    list_filter = ['available', 'featured', 'category', 'brand', 'created_at']
     list_editable = ['price', 'stock', 'available', 'featured']
     prepopulated_fields = {'slug': ('name',)}
     search_fields = ['name', 'description']

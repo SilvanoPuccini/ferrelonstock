@@ -4,23 +4,139 @@
 {% block title %}{% trans "Inicio" %}{% endblock %}
 
 {% block content %}
+<!-- Hero -->
 <section class="bg-gradient-to-r from-primary-600 to-primary-800 text-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div class="max-w-2xl">
             <h1 class="text-4xl md:text-5xl font-bold mb-4">{% trans "Todo para tu obra en un solo lugar" %}</h1>
-            <p class="text-lg text-primary-100 mb-8">{% trans "Ferretería y corralón online. Herramientas, materiales de construcción y más, con envío a todo Chile." %}</p>
+            <p class="text-lg text-primary-100 mb-8">{% trans "Ferretería y corralón online. Herramientas, materiales de construcción y más, con envío a todo el país." %}</p>
             <a href="{% url 'shop:product_list' %}" class="inline-block bg-white text-primary-700 font-semibold px-8 py-3 rounded-lg hover:bg-primary-50 transition">{% trans "Ver productos" %}</a>
         </div>
     </div>
 </section>
 
+<!-- Categorías -->
+{% if categories %}
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <h2 class="text-2xl font-bold text-center mb-10">{% trans "Categorías" %}</h2>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        {% for cat in categories %}
+        <a href="{{ cat.get_absolute_url }}" class="group bg-white rounded-xl border border-gray-200 p-6 text-center hover:shadow-md hover:border-primary-300 transition">
+            {% if cat.image %}
+                <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="w-12 h-12 mx-auto mb-3 object-contain">
+            {% else %}
+                <span class="text-3xl block mb-3">🏗️</span>
+            {% endif %}
+            <h3 class="text-sm font-semibold text-gray-900 group-hover:text-primary-600 transition">{{ cat.name }}</h3>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- Productos destacados - Pasarela + puntitos -->
+{% if featured_products %}
+<section class="bg-gray-50 py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-2xl font-bold text-gray-900">{% trans "Productos destacados" %}</h2>
+            <a href="{% url 'shop:product_list' %}" class="text-primary-600 hover:text-primary-700 font-medium text-sm">{% trans "Ver todos" %} →</a>
+        </div>
+
+        <div x-data="{
+            paused: false,
+            current: 0,
+            total: {{ featured_products|length }},
+            cardW: 280,
+            init() {
+                let el = this.$refs.carousel;
+                this.cardW = el.children[0].offsetWidth + 24;
+                const auto = () => {
+                    if (!this.paused) {
+                        el.scrollLeft += 1;
+                        let half = this.total * this.cardW;
+                        if (el.scrollLeft >= half) { el.scrollLeft = 0; }
+                        this.current = Math.round(el.scrollLeft / this.cardW) % this.total;
+                    }
+                    requestAnimationFrame(auto);
+                };
+                requestAnimationFrame(auto);
+            },
+            goTo(i) {
+                this.current = i;
+                this.$refs.carousel.scrollTo({ left: i * this.cardW, behavior: 'smooth' });
+            }
+        }" @mouseenter="paused = true" @mouseleave="paused = false">
+
+            <div x-ref="carousel"
+                class="flex gap-6 overflow-x-hidden pb-4"
+                style="scrollbar-width: none; -ms-overflow-style: none;">
+                {% for product in featured_products %}
+                <a href="{{ product.get_absolute_url }}" class="group flex-shrink-0 w-64 bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition">
+                    <div class="aspect-square bg-gray-100 flex items-center justify-center overflow-hidden">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                        {% else %}
+                            <span class="text-5xl text-gray-300">🔧</span>
+                        {% endif %}
+                    </div>
+                    <div class="p-4">
+                        <span class="text-xs text-primary-600 font-medium">{{ product.category.name }}</span>
+                        <h3 class="font-semibold text-gray-900 mt-1 group-hover:text-primary-600 transition text-sm">{{ product.name }}</h3>
+                        <div class="flex items-center justify-between mt-2">
+                            <span class="text-lg font-bold text-primary-700">${{ product.price|floatformat:0 }}</span>
+                            {% if product.in_stock %}
+                                <span class="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full font-medium">{% trans "Stock" %}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+                {% for product in featured_products %}
+                <a href="{{ product.get_absolute_url }}" class="group flex-shrink-0 w-64 bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition" aria-hidden="true">
+                    <div class="aspect-square bg-gray-100 flex items-center justify-center overflow-hidden">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                        {% else %}
+                            <span class="text-5xl text-gray-300">🔧</span>
+                        {% endif %}
+                    </div>
+                    <div class="p-4">
+                        <span class="text-xs text-primary-600 font-medium">{{ product.category.name }}</span>
+                        <h3 class="font-semibold text-gray-900 mt-1 group-hover:text-primary-600 transition text-sm">{{ product.name }}</h3>
+                        <div class="flex items-center justify-between mt-2">
+                            <span class="text-lg font-bold text-primary-700">${{ product.price|floatformat:0 }}</span>
+                            {% if product.in_stock %}
+                                <span class="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full font-medium">{% trans "Stock" %}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+
+            <!-- Puntitos -->
+            <div class="flex justify-center gap-2 mt-6">
+                {% for product in featured_products %}
+                <button @click="goTo({{ forloop.counter0 }})"
+                    class="h-3 rounded-full transition-all duration-300"
+                    :class="current === {{ forloop.counter0 }} ? 'bg-primary-600 w-6' : 'bg-gray-300 hover:bg-gray-400 w-3'">
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Features -->
 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
     <h2 class="text-2xl font-bold text-center mb-10">{% trans "¿Por qué elegirnos?" %}</h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div class="text-center p-6">
             <div class="text-4xl mb-4">🚚</div>
             <h3 class="font-semibold text-lg mb-2">{% trans "Envío rápido" %}</h3>
-            <p class="text-gray-600 text-sm">{% trans "Despacho en 24-48 horas a todo Chile." %}</p>
+            <p class="text-gray-600 text-sm">{% trans "Despacho en 24-48 horas a todo el país." %}</p>
         </div>
         <div class="text-center p-6">
             <div class="text-4xl mb-4">💳</div>
@@ -32,6 +148,18 @@
             <h3 class="font-semibold text-lg mb-2">{% trans "Calidad garantizada" %}</h3>
             <p class="text-gray-600 text-sm">{% trans "Marcas líderes del mercado ferretero." %}</p>
         </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="bg-dark-900 text-white py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-2xl font-bold mb-4">{% trans "¿Necesitás ayuda con tu proyecto?" %}</h2>
+        <p class="text-gray-400 mb-6">{% trans "Nuestro equipo te asesora por WhatsApp." %}</p>
+        <a href="https://api.whatsapp.com/send?text=Hola%20FerrelonStock%2C%20tengo%20una%20consulta" target="_blank" class="inline-flex items-center gap-2 bg-green-500 text-white font-semibold px-8 py-3 rounded-lg hover:bg-green-600 transition">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            {% trans "Chateá con nosotros" %}
+        </a>
     </div>
 </section>
 {% endblock %}

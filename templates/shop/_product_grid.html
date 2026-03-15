@@ -16,7 +16,7 @@
 
         <!-- Info -->
         <div class="p-4">
-            <span class="text-xs text-primary-600 font-medium">{{ product.category.name }}</span>
+            <div class="flex items-center justify-between"><span class="text-xs text-primary-600 font-medium">{{ product.category.name }}</span>{% if product.brand %}<span class="text-xs text-gray-400 font-medium">{{ product.brand.name }}</span>{% endif %}</div>
             <h3 class="font-semibold text-gray-900 mt-1 group-hover:text-primary-600 transition">{{ product.name }}</h3>
 
             <div class="flex items-center justify-between mt-3">
