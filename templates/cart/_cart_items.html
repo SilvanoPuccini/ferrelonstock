@@ -1,0 +1,61 @@
+{% load i18n %}
+
+{% if cart.get_total_items > 0 %}
+<div class="space-y-4">
+    {% for item in cart %}
+    <div class="flex gap-4 p-3 bg-gray-50 rounded-lg">
+        <div class="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden">
+            {% if item.product.image %}
+                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="w-full h-full object-cover">
+            {% else %}
+                <span class="text-2xl text-gray-400">🔧</span>
+            {% endif %}
+        </div>
+
+        <div class="flex-grow min-w-0">
+            <h4 class="text-sm font-semibold text-gray-900 truncate">{{ item.product.name }}</h4>
+            <p class="text-xs text-gray-500 mt-1">${{ item.price|floatformat:0 }} c/u</p>
+
+            <div class="flex items-center gap-2 mt-2">
+                <button hx-post="{% url 'cart:cart_update' item.product.id %}"
+                    hx-vals='{"quantity": {{ item.quantity|add:"-1" }}, "csrfmiddlewaretoken": "{{ csrf_token }}"}'
+                    hx-swap="none"
+                    class="w-7 h-7 flex items-center justify-center border border-gray-300 rounded text-gray-600 hover:bg-gray-100 text-sm">−</button>
+
+                <span class="text-sm font-medium w-6 text-center">{{ item.quantity }}</span>
+
+                <button hx-post="{% url 'cart:cart_update' item.product.id %}"
+                    hx-vals='{"quantity": {{ item.quantity|add:"1" }}, "csrfmiddlewaretoken": "{{ csrf_token }}"}'
+                    hx-swap="none"
+                    class="w-7 h-7 flex items-center justify-center border border-gray-300 rounded text-gray-600 hover:bg-gray-100 text-sm">+</button>
+            </div>
+        </div>
+
+        <div class="flex flex-col items-end justify-between">
+            <span class="text-sm font-bold text-primary-700">${{ item.total_price|floatformat:0 }}</span>
+            <button hx-post="{% url 'cart:cart_remove' item.product.id %}"
+                hx-vals='{"csrfmiddlewaretoken": "{{ csrf_token }}"}'
+                hx-swap="none"
+                class="text-red-500 hover:text-red-700 text-xs font-medium">{% trans "Quitar" %}</button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="border-t border-gray-200 pt-4 mt-4">
+    <div class="flex justify-between items-center mb-4">
+        <span class="font-semibold text-gray-900">{% trans "Total" %}</span>
+        <span class="text-xl font-bold text-primary-700">${{ cart.get_total_price|floatformat:0 }}</span>
+    </div>
+    <a href="{% url 'cart:cart_detail' %}" class="block w-full text-center bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition text-sm">
+        {% trans "Ver carrito completo" %}
+    </a>
+</div>
+
+{% else %}
+<div class="text-center py-12">
+    <span class="text-5xl block mb-4">🛒</span>
+    <p class="text-gray-500 text-sm">{% trans "Tu carrito está vacío" %}</p>
+    <a href="{% url 'shop:product_list' %}" class="inline-block mt-4 text-primary-600 hover:text-primary-700 text-sm font-medium">{% trans "Ver productos" %}</a>
+</div>
+{% endif %}

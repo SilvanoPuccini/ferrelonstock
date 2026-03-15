@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Cerrar sesión" %}{% endblock %}
+
+{% block content %}
+<div class="min-h-[70vh] flex items-center justify-center px-4">
+    <div class="w-full max-w-md">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
+            <h1 class="text-2xl font-bold text-gray-900 mb-4">{% trans "¿Querés cerrar sesión?" %}</h1>
+            <p class="text-gray-500 mb-8 text-sm">{% trans "Vas a salir de tu cuenta de FerrelonStock." %}</p>
+
+            <form method="POST" action="{% url 'account_logout' %}">
+                {% csrf_token %}
+                <button type="submit"
+                    class="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition text-sm">
+                    {% trans "Sí, cerrar sesión" %}
+                </button>
+            </form>
+
+            <a href="{% url 'core:home' %}" class="inline-block mt-4 text-sm text-gray-500 hover:text-gray-700">{% trans "Cancelar" %}</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Ingresar" %}{% endblock %}
+
+{% block content %}
+<div class="min-h-[70vh] flex items-center justify-center px-4">
+    <div class="w-full max-w-md">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+            <div class="text-center mb-8">
+                <h1 class="text-2xl font-bold text-gray-900">{% trans "Bienvenido de vuelta" %}</h1>
+                <p class="text-gray-500 mt-2 text-sm">{% trans "Ingresá a tu cuenta de FerrelonStock" %}</p>
+            </div>
+
+            <form method="POST" action="{% url 'account_login' %}" class="space-y-5">
+                {% csrf_token %}
+
+                <div>
+                    <label for="id_login" class="block text-sm font-medium text-gray-700 mb-1">{% trans "Email" %}</label>
+                    <input type="email" name="login" id="id_login" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition text-sm"
+                        placeholder="tu@email.com">
+                </div>
+
+                <div>
+                    <label for="id_password" class="block text-sm font-medium text-gray-700 mb-1">{% trans "Contraseña" %}</label>
+                    <input type="password" name="password" id="id_password" required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition text-sm"
+                        placeholder="••••••••">
+                </div>
+
+                {% if form.errors %}
+                <div class="bg-red-50 text-red-700 text-sm p-3 rounded-lg border border-red-200">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <button type="submit"
+                    class="w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition text-sm">
+                    {% trans "Ingresar" %}
+                </button>
+            </form>
+
+            <div class="mt-6 text-center text-sm">
+                <a href="{% url 'account_reset_password' %}" class="text-primary-600 hover:text-primary-700 font-medium">{% trans "¿Olvidaste tu contraseña?" %}</a>
+            </div>
+
+            <div class="mt-4 text-center text-sm text-gray-500">
+                {% trans "¿No tenés cuenta?" %}
+                <a href="{% url 'account_signup' %}" class="text-primary-600 hover:text-primary-700 font-medium">{% trans "Registrate" %}</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
