@@ -18,10 +18,11 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-        <!-- Formulario -->
         <div class="lg:col-span-2">
             <form method="POST" class="space-y-6">
                 {% csrf_token %}
+                <input type="hidden" name="shipping_price" id="shipping-price" value="0">
+                <input type="hidden" name="shipping_zone" id="shipping-zone" value="">
 
                 <div class="bg-white rounded-xl border border-gray-200 p-6">
                     <h2 class="font-semibold text-gray-900 mb-4">{% trans "Datos de contacto" %}</h2>
@@ -39,7 +40,6 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">{{ form.email.label }}</label>
                             {{ form.email }}
-                            {% if form.email.errors %}<p class="text-red-500 text-xs mt-1">{{ form.email.errors.0 }}</p>{% endif %}
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">{{ form.phone.label }}</label>
@@ -54,13 +54,11 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">{{ form.address.label }}</label>
                             {{ form.address }}
-                            {% if form.address.errors %}<p class="text-red-500 text-xs mt-1">{{ form.address.errors.0 }}</p>{% endif %}
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">{{ form.city.label }}</label>
                                 {{ form.city }}
-                                {% if form.city.errors %}<p class="text-red-500 text-xs mt-1">{{ form.city.errors.0 }}</p>{% endif %}
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">{{ form.region.label }}</label>
@@ -71,6 +69,33 @@
                                 {{ form.postal_code }}
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Envío -->
+                <div class="bg-white rounded-xl border border-gray-200 p-6">
+                    <h2 class="font-semibold text-gray-900 mb-4">{% trans "Método de envío" %}</h2>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">{% trans "Zona" %}</label>
+                        <select name="zone"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
+                            hx-get="{% url 'shipping:calculator' %}"
+                            hx-trigger="change"
+                            hx-target="#shipping-options"
+                            hx-swap="innerHTML"
+                            hx-include="this">
+                            <option value="">{% trans "Seleccioná tu zona" %}</option>
+                            {% for zone in zones %}
+                            <option value="{{ zone.code }}">{{ zone.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div id="shipping-options"
+                        hx-get="{% url 'shipping:calculator' %}"
+                        hx-trigger="load"
+                        hx-swap="innerHTML">
                     </div>
                 </div>
 
@@ -109,7 +134,7 @@
                     </div>
                     <div class="flex justify-between text-sm">
                         <span class="text-gray-600">{% trans "Envío" %}</span>
-                        <span class="text-green-600 font-medium">{% trans "Gratis" %}</span>
+                        <span class="font-medium text-green-600" id="shipping-display">{% trans "Seleccioná zona" %}</span>
                     </div>
                     <div class="flex justify-between pt-2 border-t border-gray-200">
                         <span class="font-bold text-gray-900">{% trans "Total" %}</span>

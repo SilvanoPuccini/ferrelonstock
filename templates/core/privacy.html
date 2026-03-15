@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Política de Privacidad" %}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-2xl font-bold text-gray-900 mb-6">{% trans "Política de Privacidad" %}</h1>
+    <div class="bg-white rounded-xl border border-gray-200 p-8 prose prose-sm max-w-none text-gray-600">
+        <h2 class="text-lg font-semibold text-gray-900">1. {% trans "Datos que recopilamos" %}</h2>
+        <p>{% trans "Recopilamos datos personales como nombre, email, dirección y teléfono cuando realizás una compra o te registrás en nuestro sitio." %}</p>
+
+        <h2 class="text-lg font-semibold text-gray-900 mt-6">2. {% trans "Uso de los datos" %}</h2>
+        <p>{% trans "Utilizamos tus datos para procesar pedidos, mejorar nuestro servicio y enviarte comunicaciones relevantes. No compartimos tu información personal con terceros sin tu consentimiento." %}</p>
+
+        <h2 class="text-lg font-semibold text-gray-900 mt-6">3. {% trans "Seguridad" %}</h2>
+        <p>{% trans "Implementamos medidas de seguridad técnicas y organizativas para proteger tus datos personales contra acceso no autorizado, pérdida o destrucción." %}</p>
+
+        <h2 class="text-lg font-semibold text-gray-900 mt-6">4. {% trans "Cookies" %}</h2>
+        <p>{% trans "Nuestro sitio utiliza cookies para mejorar la experiencia de navegación. Podés configurar tu navegador para rechazar cookies, aunque algunas funcionalidades podrían verse afectadas." %}</p>
+
+        <h2 class="text-lg font-semibold text-gray-900 mt-6">5. {% trans "Tus derechos" %}</h2>
+        <p>{% trans "Tenés derecho a acceder, rectificar y eliminar tus datos personales. Para ejercer estos derechos, contactanos a info@ferrelonstock.com." %}</p>
+    </div>
+</div>
+{% endblock %}

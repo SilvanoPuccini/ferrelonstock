@@ -1,0 +1,30 @@
+{% load i18n %}
+
+<div class="space-y-3">
+    {% for option in options %}
+    <label class="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:border-primary-300 transition has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50">
+        <input type="radio" name="shipping_method" value="{{ option.method.code }}"
+            {% if forloop.first %}checked{% endif %}
+            class="mt-1 text-primary-600 focus:ring-primary-500"
+            onchange="document.getElementById('shipping-price').value = '{{ option.price }}';
+                     document.getElementById('shipping-zone').value = '{{ option.zone.code|default:"" }}';
+                     document.getElementById('shipping-display').textContent = '{{ option.label }}';">
+        <div class="flex-grow">
+            <div class="flex items-center justify-between">
+                <span class="font-medium text-gray-900 text-sm">{{ option.method.name }}</span>
+                {% if option.is_free and option.method.code != 'pickup' %}
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs line-through text-gray-400">${{ option.original_price|floatformat:0 }}</span>
+                        <span class="text-sm font-bold text-green-600">{% trans "GRATIS" %}</span>
+                    </div>
+                {% elif option.is_free %}
+                    <span class="text-sm font-bold text-green-600">{% trans "GRATIS" %}</span>
+                {% else %}
+                    <span class="text-sm font-bold text-gray-900">${{ option.price|floatformat:0 }}</span>
+                {% endif %}
+            </div>
+            <p class="text-xs text-gray-500 mt-1">{{ option.sublabel }}</p>
+        </div>
+    </label>
+    {% endfor %}
+</div>

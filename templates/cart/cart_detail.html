@@ -60,15 +60,24 @@
             {% endfor %}
         </div>
 
+        <!-- Barra de envío gratis -->
+        <div class="mb-6">
+            {% include '_includes/free_shipping_bar.html' %}
+        </div>
+
         <!-- Resumen -->
-        <div class="bg-white rounded-xl border border-gray-200 p-6 mt-6">
+        <div class="bg-white rounded-xl border border-gray-200 p-6">
             <div class="flex justify-between items-center mb-2">
                 <span class="text-gray-600">{% trans "Subtotal" %} ({{ cart.get_total_items }} {% trans "items" %})</span>
                 <span class="font-semibold text-gray-900">${{ cart.get_total_price|floatformat:0 }}</span>
             </div>
             <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
                 <span class="text-gray-600">{% trans "Envío" %}</span>
-                <span class="text-sm text-gray-500">{% trans "Se calcula en el checkout" %}</span>
+                {% if free_shipping_qualified %}
+                    <span class="text-sm font-bold text-green-600">{% trans "¡GRATIS!" %}</span>
+                {% else %}
+                    <span class="text-sm text-gray-500">{% trans "Se calcula en el checkout" %}</span>
+                {% endif %}
             </div>
             <div class="flex justify-between items-center mb-6">
                 <span class="text-lg font-bold text-gray-900">{% trans "Total" %}</span>

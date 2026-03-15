@@ -10,6 +10,8 @@ urlpatterns = [
     path('cart/', include('cart.urls')),
     path('orders/', include('orders.urls')),
     path('payments/', include('payments.urls')),
+    path('shipping/', include('shipping.urls')),
+    path('i18n/', include('django.conf.urls.i18n')),
     path('', include('core.urls')),
 ]
 

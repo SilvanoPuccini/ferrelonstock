@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Contacto" %}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <h1 class="text-2xl font-bold text-gray-900 mb-2">{% trans "Contacto" %}</h1>
+    <p class="text-gray-500 mb-8">{% trans "¿Tenés alguna consulta? Escribinos y te respondemos a la brevedad." %}</p>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <div class="lg:col-span-2">
+            <form method="POST" class="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
+                {% csrf_token %}
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ form.name.label }}</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}<p class="text-red-500 text-xs mt-1">{{ form.name.errors.0 }}</p>{% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ form.email.label }}</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}<p class="text-red-500 text-xs mt-1">{{ form.email.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ form.subject.label }}</label>
+                    {{ form.subject }}
+                    {% if form.subject.errors %}<p class="text-red-500 text-xs mt-1">{{ form.subject.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ form.message.label }}</label>
+                    {{ form.message }}
+                    {% if form.message.errors %}<p class="text-red-500 text-xs mt-1">{{ form.message.errors.0 }}</p>{% endif %}
+                </div>
+
+                <button type="submit" class="w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition text-sm">
+                    {% trans "Enviar mensaje" %}
+                </button>
+            </form>
+        </div>
+
+        <div class="space-y-6">
+            <div class="bg-white rounded-xl border border-gray-200 p-6">
+                <h3 class="font-semibold text-gray-900 mb-4">{% trans "Información" %}</h3>
+                <div class="space-y-3 text-sm text-gray-600">
+                    <p>📍 Av. Corrientes 1234, CABA, Argentina</p>
+                    <p>📞 +54 11 5573-9987</p>
+                    <p>✉️ info@ferrelonstock.com</p>
+                    <p>🕐 {% trans "Lunes a Viernes 8:00 - 18:00" %}</p>
+                    <p>🕐 {% trans "Sábados 9:00 - 14:00" %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

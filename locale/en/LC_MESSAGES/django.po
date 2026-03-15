@@ -1,0 +1,643 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-15 16:29-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+#: core/views.py:27
+msgid "¡Mensaje enviado con éxito! Te responderemos pronto."
+msgstr ""
+
+#: orders/views.py:15
+msgid "Tu carrito está vacío."
+msgstr ""
+
+#: orders/views.py:41
+#, python-brace-format
+msgid "¡Pedido #{order.pk} creado con éxito!"
+msgstr ""
+
+#: payments/views.py:78
+msgid "¡Pago realizado con éxito!"
+msgstr ""
+
+#: payments/views.py:137
+msgid "¡Pago realizado con éxito con Mercado Pago!"
+msgstr ""
+
+#: payments/views.py:148
+msgid "Tu pago está pendiente de confirmación."
+msgstr ""
+
+#: payments/views.py:150
+msgid "El pago no fue aprobado."
+msgstr ""
+
+#: payments/views.py:158
+msgid "El pago fue cancelado. Podés intentar de nuevo."
+msgstr ""
+
+#: templates/_includes/footer.html:8
+msgid ""
+"Tu ferretería y corralón online. Materiales de construcción, herramientas y "
+"todo lo que necesitás para tu obra."
+msgstr ""
+
+#: templates/_includes/footer.html:12
+msgid "Tienda"
+msgstr ""
+
+#: templates/_includes/footer.html:14 templates/_includes/header.html:13
+#: templates/_includes/header.html:52 templates/shop/product_detail.html:12
+#: templates/shop/product_list.html:5 templates/shop/product_list.html:15
+msgid "Productos"
+msgstr ""
+
+#: templates/_includes/footer.html:19
+msgid "Empresa"
+msgstr ""
+
+#: templates/_includes/footer.html:21 templates/_includes/footer.html:28
+#: templates/_includes/header.html:14 templates/_includes/header.html:53
+#: templates/core/contact.html:4 templates/core/contact.html:9
+msgid "Contacto"
+msgstr ""
+
+#: templates/_includes/footer.html:22 templates/core/terms.html:4
+#: templates/core/terms.html:8
+msgid "Términos y Condiciones"
+msgstr ""
+
+#: templates/_includes/footer.html:23 templates/core/privacy.html:4
+#: templates/core/privacy.html:8
+msgid "Política de Privacidad"
+msgstr ""
+
+#: templates/_includes/footer.html:38
+msgid "Todos los derechos reservados."
+msgstr ""
+
+#: templates/_includes/footer.html:40
+msgid "Pagos seguros con"
+msgstr ""
+
+#: templates/_includes/header.html:12 templates/_includes/header.html:51
+#: templates/cart/cart_detail.html:10 templates/core/home.html:4
+#: templates/orders/checkout.html:10 templates/shop/product_detail.html:10
+#: templates/shop/product_list.html:13
+msgid "Inicio"
+msgstr ""
+
+#: templates/_includes/header.html:21 templates/_includes/header.html:55
+msgid "Salir"
+msgstr ""
+
+#: templates/_includes/header.html:25 templates/_includes/header.html:57
+#: templates/account/login.html:4 templates/account/login.html:47
+msgid "Ingresar"
+msgstr ""
+
+#: templates/_includes/header.html:26 templates/_includes/header.html:58
+msgid "Registrarse"
+msgstr ""
+
+#: templates/_includes/header.html:82 templates/cart/cart_detail.html:4
+#: templates/cart/cart_detail.html:12 templates/orders/checkout.html:12
+msgid "Carrito"
+msgstr ""
+
+#: templates/account/login.html:11
+msgid "Bienvenido de vuelta"
+msgstr ""
+
+#: templates/account/login.html:12
+msgid "Ingresá a tu cuenta de FerrelonStock"
+msgstr ""
+
+#: templates/account/login.html:19 templates/account/password_reset.html:19
+#: templates/account/signup.html:19 templates/orders/order_detail.html:75
+msgid "Email"
+msgstr ""
+
+#: templates/account/login.html:26 templates/account/signup.html:26
+msgid "Contraseña"
+msgstr ""
+
+#: templates/account/login.html:52
+msgid "¿Olvidaste tu contraseña?"
+msgstr ""
+
+#: templates/account/login.html:56
+msgid "¿No tenés cuenta?"
+msgstr ""
+
+#: templates/account/login.html:57
+msgid "Registrate"
+msgstr ""
+
+#: templates/account/logout.html:4
+msgid "Cerrar sesión"
+msgstr ""
+
+#: templates/account/logout.html:10
+msgid "¿Querés cerrar sesión?"
+msgstr ""
+
+#: templates/account/logout.html:11
+msgid "Vas a salir de tu cuenta de FerrelonStock."
+msgstr ""
+
+#: templates/account/logout.html:17
+msgid "Sí, cerrar sesión"
+msgstr ""
+
+#: templates/account/logout.html:21
+msgid "Cancelar"
+msgstr ""
+
+#: templates/account/password_reset.html:4
+#: templates/account/password_reset.html:11
+msgid "Recuperar contraseña"
+msgstr ""
+
+#: templates/account/password_reset.html:12
+msgid "Te enviaremos un email para restablecer tu contraseña."
+msgstr ""
+
+#: templates/account/password_reset.html:27
+msgid "Enviar email"
+msgstr ""
+
+#: templates/account/password_reset.html:32
+msgid "Volver al login"
+msgstr ""
+
+#: templates/account/signup.html:4 templates/account/signup.html:11
+#: templates/account/signup.html:54
+msgid "Crear cuenta"
+msgstr ""
+
+#: templates/account/signup.html:12
+msgid "Registrate en FerrelonStock"
+msgstr ""
+
+#: templates/account/signup.html:33
+msgid "Repetir contraseña"
+msgstr ""
+
+#: templates/account/signup.html:59
+msgid "¿Ya tenés cuenta?"
+msgstr ""
+
+#: templates/account/signup.html:60
+msgid "Ingresá"
+msgstr ""
+
+#: templates/cart/_cart_items.html:39 templates/cart/cart_detail.html:57
+msgid "Quitar"
+msgstr ""
+
+#: templates/cart/_cart_items.html:47 templates/cart/cart_detail.html:74
+#: templates/orders/checkout.html:115 templates/orders/order_detail.html:54
+#: templates/orders/order_success.html:27
+msgid "Total"
+msgstr ""
+
+#: templates/cart/_cart_items.html:51
+msgid "Ver carrito completo"
+msgstr ""
+
+#: templates/cart/_cart_items.html:58 templates/cart/cart_detail.html:90
+msgid "Tu carrito está vacío"
+msgstr ""
+
+#: templates/cart/_cart_items.html:59 templates/cart/cart_detail.html:92
+#: templates/core/home.html:13 templates/orders/order_history.html:32
+msgid "Ver productos"
+msgstr ""
+
+#: templates/cart/cart_detail.html:15
+msgid "Tu carrito"
+msgstr ""
+
+#: templates/cart/cart_detail.html:66 templates/orders/checkout.html:107
+msgid "Subtotal"
+msgstr ""
+
+#: templates/cart/cart_detail.html:66 templates/orders/order_history.html:21
+msgid "items"
+msgstr ""
+
+#: templates/cart/cart_detail.html:70 templates/orders/checkout.html:111
+#: templates/orders/order_detail.html:50 templates/orders/order_detail.html:61
+msgid "Envío"
+msgstr ""
+
+#: templates/cart/cart_detail.html:71
+msgid "Se calcula en el checkout"
+msgstr ""
+
+#: templates/cart/cart_detail.html:79
+msgid "Proceder al pago"
+msgstr ""
+
+#: templates/cart/cart_detail.html:82 templates/orders/order_success.html:38
+msgid "Seguir comprando"
+msgstr ""
+
+#: templates/cart/cart_detail.html:91
+msgid "Agregá productos para empezar tu compra."
+msgstr ""
+
+#: templates/core/contact.html:10
+msgid "¿Tenés alguna consulta? Escribinos y te respondemos a la brevedad."
+msgstr ""
+
+#: templates/core/contact.html:44
+msgid "Enviar mensaje"
+msgstr ""
+
+#: templates/core/contact.html:51
+msgid "Información"
+msgstr ""
+
+#: templates/core/contact.html:56
+msgid "Lunes a Viernes 8:00 - 18:00"
+msgstr ""
+
+#: templates/core/contact.html:57
+msgid "Sábados 9:00 - 14:00"
+msgstr ""
+
+#: templates/core/home.html:11
+msgid "Todo para tu obra en un solo lugar"
+msgstr ""
+
+#: templates/core/home.html:12
+msgid ""
+"Ferretería y corralón online. Herramientas, materiales de construcción y "
+"más, con envío a todo Chile."
+msgstr ""
+
+#: templates/core/home.html:21 templates/shop/product_list.html:42
+msgid "Categorías"
+msgstr ""
+
+#: templates/core/home.html:41
+msgid "Productos destacados"
+msgstr ""
+
+#: templates/core/home.html:61
+msgid "Ver todos los productos"
+msgstr ""
+
+#: templates/core/home.html:69
+msgid "¿Por qué elegirnos?"
+msgstr ""
+
+#: templates/core/home.html:73
+msgid "Envío rápido"
+msgstr ""
+
+#: templates/core/home.html:74
+msgid "Despacho en 24-48 horas a todo Chile."
+msgstr ""
+
+#: templates/core/home.html:78
+msgid "Pago seguro"
+msgstr ""
+
+#: templates/core/home.html:79
+msgid "Stripe y Mercado Pago. Tu compra protegida."
+msgstr ""
+
+#: templates/core/home.html:83
+msgid "Calidad garantizada"
+msgstr ""
+
+#: templates/core/home.html:84
+msgid "Marcas líderes del mercado ferretero."
+msgstr ""
+
+#: templates/core/privacy.html:10
+msgid "Datos que recopilamos"
+msgstr ""
+
+#: templates/core/privacy.html:11
+msgid ""
+"Recopilamos datos personales como nombre, email, dirección y teléfono cuando "
+"realizás una compra o te registrás en nuestro sitio."
+msgstr ""
+
+#: templates/core/privacy.html:13
+msgid "Uso de los datos"
+msgstr ""
+
+#: templates/core/privacy.html:14
+msgid ""
+"Utilizamos tus datos para procesar pedidos, mejorar nuestro servicio y "
+"enviarte comunicaciones relevantes. No compartimos tu información personal "
+"con terceros sin tu consentimiento."
+msgstr ""
+
+#: templates/core/privacy.html:16
+msgid "Seguridad"
+msgstr ""
+
+#: templates/core/privacy.html:17
+msgid ""
+"Implementamos medidas de seguridad técnicas y organizativas para proteger "
+"tus datos personales contra acceso no autorizado, pérdida o destrucción."
+msgstr ""
+
+#: templates/core/privacy.html:19
+msgid "Cookies"
+msgstr ""
+
+#: templates/core/privacy.html:20
+msgid ""
+"Nuestro sitio utiliza cookies para mejorar la experiencia de navegación. "
+"Podés configurar tu navegador para rechazar cookies, aunque algunas "
+"funcionalidades podrían verse afectadas."
+msgstr ""
+
+#: templates/core/privacy.html:22
+msgid "Tus derechos"
+msgstr ""
+
+#: templates/core/privacy.html:23
+msgid ""
+"Tenés derecho a acceder, rectificar y eliminar tus datos personales. Para "
+"ejercer estos derechos, contactanos a info@ferrelonstock.com."
+msgstr ""
+
+#: templates/core/terms.html:10
+msgid "Generalidades"
+msgstr ""
+
+#: templates/core/terms.html:11
+msgid ""
+"FerrelonStock es una plataforma de comercio electrónico dedicada a la venta "
+"de productos de ferretería y materiales de construcción. Al utilizar nuestro "
+"sitio web, aceptás estos términos y condiciones."
+msgstr ""
+
+#: templates/core/terms.html:13
+msgid "Productos y precios"
+msgstr ""
+
+#: templates/core/terms.html:14
+msgid ""
+"Los precios publicados incluyen IVA. Nos reservamos el derecho de modificar "
+"precios sin previo aviso. La disponibilidad de productos está sujeta a stock."
+msgstr ""
+
+#: templates/core/terms.html:16
+msgid "Envíos"
+msgstr ""
+
+#: templates/core/terms.html:17
+msgid ""
+"Los envíos se realizan a todo Chile. Los plazos de entrega son estimativos y "
+"pueden variar según la zona. FerrelonStock no se responsabiliza por demoras "
+"del servicio de transporte."
+msgstr ""
+
+#: templates/core/terms.html:19
+msgid "Devoluciones"
+msgstr ""
+
+#: templates/core/terms.html:20
+msgid ""
+"Aceptamos devoluciones dentro de los 10 días hábiles posteriores a la "
+"recepción del producto, siempre que se encuentre en su estado original y con "
+"el embalaje intacto."
+msgstr ""
+
+#: templates/core/terms.html:22
+msgid "Pagos"
+msgstr ""
+
+#: templates/core/terms.html:23
+msgid ""
+"Aceptamos pagos a través de Stripe (tarjetas internacionales) y Mercado Pago "
+"(tarjetas, transferencias y otros medios de pago locales). Todas las "
+"transacciones son procesadas de forma segura."
+msgstr ""
+
+#: templates/orders/checkout.html:4 templates/orders/checkout.html:14
+msgid "Checkout"
+msgstr ""
+
+#: templates/orders/checkout.html:17
+msgid "Finalizar compra"
+msgstr ""
+
+#: templates/orders/checkout.html:27
+msgid "Datos de contacto"
+msgstr ""
+
+#: templates/orders/checkout.html:52
+msgid "Dirección de envío"
+msgstr ""
+
+#: templates/orders/checkout.html:78 templates/orders/order_detail.html:76
+msgid "Notas"
+msgstr ""
+
+#: templates/orders/checkout.html:83
+msgid "Confirmar pedido"
+msgstr ""
+
+#: templates/orders/checkout.html:91
+msgid "Resumen del pedido"
+msgstr ""
+
+#: templates/orders/checkout.html:112 templates/orders/order_detail.html:51
+msgid "Gratis"
+msgstr ""
+
+#: templates/orders/order_detail.html:4 templates/orders/order_detail.html:12
+#: templates/orders/order_detail.html:16 templates/orders/order_history.html:18
+#: templates/payments/payment_select.html:10
+#: templates/payments/payment_select.html:16
+msgid "Pedido"
+msgstr ""
+
+#: templates/orders/order_detail.html:10 templates/orders/order_history.html:4
+#: templates/orders/order_history.html:9
+msgid "Mis pedidos"
+msgstr ""
+
+#: templates/orders/order_detail.html:43
+msgid "Resumen"
+msgstr ""
+
+#: templates/orders/order_detail.html:46 templates/orders/order_success.html:23
+msgid "Items"
+msgstr ""
+
+#: templates/orders/order_detail.html:72
+msgid "Info"
+msgstr ""
+
+#: templates/orders/order_detail.html:74
+msgid "Fecha"
+msgstr ""
+
+#: templates/orders/order_detail.html:81
+msgid "Pagar ahora"
+msgstr ""
+
+#: templates/orders/order_history.html:31
+msgid "No tenés pedidos todavía"
+msgstr ""
+
+#: templates/orders/order_success.html:4
+msgid "Pedido confirmado"
+msgstr ""
+
+#: templates/orders/order_success.html:10
+msgid "¡Pedido confirmado!"
+msgstr ""
+
+#: templates/orders/order_success.html:11
+msgid "Tu pedido"
+msgstr ""
+
+#: templates/orders/order_success.html:11
+msgid "fue creado con éxito."
+msgstr ""
+
+#: templates/orders/order_success.html:15
+msgid "Enviado a"
+msgstr ""
+
+#: templates/orders/order_success.html:19
+msgid "Dirección"
+msgstr ""
+
+#: templates/orders/order_success.html:24 templates/shop/product_list.html:71
+msgid "productos"
+msgstr ""
+
+#: templates/orders/order_success.html:31
+msgid "Estado"
+msgstr ""
+
+#: templates/orders/order_success.html:32
+msgid "Pendiente de pago"
+msgstr ""
+
+#: templates/orders/order_success.html:37
+msgid "Ver detalle del pedido"
+msgstr ""
+
+#: templates/payments/payment_select.html:4
+msgid "Método de pago"
+msgstr ""
+
+#: templates/payments/payment_select.html:12
+msgid "Pagar"
+msgstr ""
+
+#: templates/payments/payment_select.html:15
+msgid "Elegí cómo pagar"
+msgstr ""
+
+#: templates/payments/payment_select.html:28
+msgid "Tarjeta de crédito o débito internacional"
+msgstr ""
+
+#: templates/payments/payment_select.html:43
+msgid "Tarjeta, transferencia o efectivo (Latinoamérica)"
+msgstr ""
+
+#: templates/payments/payment_select.html:52
+msgid "Volver al pedido"
+msgstr ""
+
+#: templates/shop/_product_grid.html:26 templates/shop/product_detail.html:36
+msgid "En stock"
+msgstr ""
+
+#: templates/shop/_product_grid.html:28 templates/shop/product_detail.html:38
+msgid "Sin stock"
+msgstr ""
+
+#: templates/shop/_product_grid.html:40
+msgid "Anterior"
+msgstr ""
+
+#: templates/shop/_product_grid.html:52
+msgid "Siguiente"
+msgstr ""
+
+#: templates/shop/_product_grid.html:60
+msgid "No se encontraron productos"
+msgstr ""
+
+#: templates/shop/_product_grid.html:61
+msgid "Probá con otra búsqueda o categoría."
+msgstr ""
+
+#: templates/shop/product_detail.html:44
+msgid "Descripción"
+msgstr ""
+
+#: templates/shop/product_detail.html:67
+msgid "Agregar al carrito"
+msgstr ""
+
+#: templates/shop/product_detail.html:76
+msgid "Categoría"
+msgstr ""
+
+#: templates/shop/product_detail.html:80
+msgid "Disponibilidad"
+msgstr ""
+
+#: templates/shop/product_detail.html:81
+msgid "Disponible"
+msgstr ""
+
+#: templates/shop/product_detail.html:81
+msgid "No disponible"
+msgstr ""
+
+#: templates/shop/product_detail.html:84
+msgid "Código"
+msgstr ""
+
+#: templates/shop/product_detail.html:93
+msgid "Productos relacionados"
+msgstr ""
+
+#: templates/shop/product_list.html:29
+msgid "Buscar"
+msgstr ""
+
+#: templates/shop/product_list.html:31
+msgid "Buscar productos..."
+msgstr ""
+
+#: templates/shop/product_list.html:48
+msgid "Todas"
+msgstr ""
+
+#: templates/shop/product_list.html:69
+msgid "Todos los productos"
+msgstr ""

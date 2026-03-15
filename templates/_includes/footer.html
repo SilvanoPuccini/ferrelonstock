@@ -1,7 +1,7 @@
 {% load i18n %}
 <footer class="bg-dark-900 text-gray-400 mt-auto">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
 
             <div>
                 <span class="text-xl font-bold text-white">Ferrelon<span class="text-primary-500">Stock</span></span>
@@ -9,26 +9,39 @@
             </div>
 
             <div>
-                <h3 class="text-white font-semibold mb-3">{% trans "Enlaces" %}</h3>
+                <h3 class="text-white font-semibold mb-3">{% trans "Tienda" %}</h3>
                 <ul class="space-y-2 text-sm">
-                    <li><a href="{% url 'core:home' %}" class="hover:text-primary-400 transition">{% trans "Inicio" %}</a></li>
-                    <li><a href="#" class="hover:text-primary-400 transition">{% trans "Productos" %}</a></li>
-                    <li><a href="#" class="hover:text-primary-400 transition">{% trans "Contacto" %}</a></li>
+                    <li><a href="{% url 'shop:product_list' %}" class="hover:text-primary-400 transition">{% trans "Productos" %}</a></li>
+                    <li><a href="{% url 'core:about' %}" class="hover:text-primary-400 transition">{% trans "Nosotros" %}</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="text-white font-semibold mb-3">{% trans "Legal" %}</h3>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="{% url 'core:contact' %}" class="hover:text-primary-400 transition">{% trans "Contacto" %}</a></li>
+                    <li><a href="{% url 'core:terms' %}" class="hover:text-primary-400 transition">{% trans "Términos y Condiciones" %}</a></li>
+                    <li><a href="{% url 'core:privacy' %}" class="hover:text-primary-400 transition">{% trans "Política de Privacidad" %}</a></li>
                 </ul>
             </div>
 
             <div>
                 <h3 class="text-white font-semibold mb-3">{% trans "Contacto" %}</h3>
                 <ul class="space-y-2 text-sm">
-                    <li>📍 Pucón, Araucanía, Chile</li>
-                    <li>📞 +56 9 1234 5678</li>
+                    <li>📍 Av. Corrientes 1234, CABA, Argentina</li>
+                    <li>📞 +54 11 5573-9987</li>
                     <li>✉️ info@ferrelonstock.com</li>
                 </ul>
             </div>
         </div>
 
-        <div class="border-t border-gray-700 mt-8 pt-8 text-center text-sm">
+        <div class="border-t border-gray-700 mt-8 pt-8 flex flex-col sm:flex-row justify-between items-center text-sm gap-4">
             <p>&copy; 2026 FerrelonStock. {% trans "Todos los derechos reservados." %}</p>
+            <div class="flex items-center gap-4">
+                <span class="text-xs text-gray-500">{% trans "Pagos seguros con" %}</span>
+                <span class="text-gray-400 font-medium">Stripe</span>
+                <span class="text-gray-400 font-medium">Mercado Pago</span>
+            </div>
         </div>
     </div>
 </footer>

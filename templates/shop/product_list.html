@@ -2,13 +2,12 @@
 {% load i18n %}
 
 {% block title %}
-    {% if current_category %}{{ current_category.name }}{% else %}{% trans "Productos" %}{% endif %}
+    {% if current_category %}{{ current_category.name }}{% elif current_brand %}{{ current_brand.name }}{% else %}{% trans "Productos" %}{% endif %}
 {% endblock %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <!-- Breadcrumb -->
     <nav class="flex mb-6 text-sm text-gray-500">
         <a href="{% url 'core:home' %}" class="hover:text-primary-600">{% trans "Inicio" %}</a>
         <span class="mx-2">/</span>
@@ -16,19 +15,21 @@
         {% if current_category %}
             <span class="mx-2">/</span>
             <span class="text-gray-900 font-medium">{{ current_category.name }}</span>
+        {% elif current_brand %}
+            <span class="mx-2">/</span>
+            <span class="text-gray-900 font-medium">{{ current_brand.name }}</span>
         {% endif %}
     </nav>
 
     <div class="flex flex-col lg:flex-row gap-8">
 
-        <!-- Sidebar: categorías + buscador -->
-        <aside class="w-full lg:w-64 flex-shrink-0">
+        <aside class="w-full lg:w-64 flex-shrink-0 space-y-6">
 
-            <!-- Buscador HTMX -->
-            <div class="mb-6">
+            <!-- Buscador -->
+            <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">{% trans "Buscar" %}</label>
                 <input type="search" name="q" value="{{ search_query }}"
-                    placeholder="{% trans 'Buscar productos...' %}"
+                    placeholder="{% trans 'Producto o marca...' %}"
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
                     hx-get="{% url 'shop:product_list' %}"
                     hx-trigger="keyup changed delay:300ms"
@@ -44,9 +45,8 @@
                     <li>
                         <a href="{% url 'shop:product_list' %}"
                             class="block py-2 px-3 rounded-lg text-sm transition
-                            {% if not current_category %}bg-primary-50 text-primary-700 font-medium{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
+                            {% if not current_category and not current_brand %}bg-primary-50 text-primary-700 font-medium{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
                             {% trans "Todas" %}
-                            <span class="text-xs text-gray-400">({{ products.paginator.count|default:"0" }})</span>
                         </a>
                     </li>
                     {% for cat in categories %}
@@ -60,13 +60,30 @@
                     {% endfor %}
                 </ul>
             </div>
+
+            <!-- Marcas -->
+            <div class="bg-white rounded-xl border border-gray-200 p-4">
+                <h3 class="font-semibold text-gray-900 mb-3">{% trans "Marcas" %}</h3>
+                <ul class="space-y-1">
+                    {% for brand in brands %}
+                    <li>
+                        <a href="{% url 'shop:product_list_by_brand' brand.slug %}"
+                            class="block py-2 px-3 rounded-lg text-sm transition
+                            {% if current_brand.slug == brand.slug %}bg-primary-50 text-primary-700 font-medium{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
+                            {{ brand.name }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
         </aside>
 
-        <!-- Grid de productos -->
         <div class="flex-grow">
             <div class="flex justify-between items-center mb-6">
                 <h1 class="text-2xl font-bold text-gray-900">
-                    {% if current_category %}{{ current_category.name }}{% else %}{% trans "Todos los productos" %}{% endif %}
+                    {% if current_category %}{{ current_category.name }}
+                    {% elif current_brand %}{{ current_brand.name }}
+                    {% else %}{% trans "Todos los productos" %}{% endif %}
                 </h1>
                 <span class="text-sm text-gray-500">{{ products.paginator.count }} {% trans "productos" %}</span>
             </div>
