@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Order, OrderItem
+from .models import Order, OrderItem, OrderMessage
 
 
 class OrderItemInline(admin.TabularInline):
@@ -13,33 +13,30 @@ class OrderItemInline(admin.TabularInline):
     get_total.short_description = 'Total'
 
 
+class OrderMessageInline(admin.TabularInline):
+    model = OrderMessage
+    extra = 1
+    readonly_fields = ['created_at']
+    fields = ['sender', 'message_type', 'subject', 'body', 'is_from_staff', 'is_read', 'created_at']
+
+
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['id', 'user', 'first_name', 'last_name', 'status', 'total', 'created_at']
-    list_filter = ['status', 'created_at']
-    list_editable = ['status']
+    list_display = ['id', 'user', 'first_name', 'last_name', 'payment_status', 'status', 'total', 'created_at']
+    list_filter = ['payment_status', 'status', 'created_at']
+    list_editable = ['payment_status', 'status']
     search_fields = ['first_name', 'last_name', 'email', 'address']
     readonly_fields = ['created_at', 'updated_at']
-    inlines = [OrderItemInline]
+    inlines = [OrderItemInline, OrderMessageInline]
     list_per_page = 25
-    actions = ['mark_as_paid', 'mark_as_shipped', 'mark_as_delivered', 'mark_as_cancelled']
 
     def total(self, obj):
         return f'${obj.total:,.0f}'
     total.short_description = 'Total'
 
-    @admin.action(description='Marcar como pagado')
-    def mark_as_paid(self, request, queryset):
-        queryset.update(status='paid')
 
-    @admin.action(description='Marcar como enviado')
-    def mark_as_shipped(self, request, queryset):
-        queryset.update(status='shipped')
-
-    @admin.action(description='Marcar como entregado')
-    def mark_as_delivered(self, request, queryset):
-        queryset.update(status='delivered')
-
-    @admin.action(description='Marcar como cancelado')
-    def mark_as_cancelled(self, request, queryset):
-        queryset.update(status='cancelled')
+@admin.register(OrderMessage)
+class OrderMessageAdmin(admin.ModelAdmin):
+    list_display = ['order', 'sender', 'message_type', 'subject', 'is_from_staff', 'is_read', 'created_at']
+    list_filter = ['message_type', 'is_from_staff', 'is_read']
+    list_editable = ['is_read']

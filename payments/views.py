@@ -5,9 +5,7 @@ from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+from django.http import HttpResponse
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from orders.models import Order
@@ -18,7 +16,9 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 @login_required
 def payment_select(request, order_id):
-    order = get_object_or_404(Order, pk=order_id, user=request.user, status='pending')
+    order = get_object_or_404(Order, pk=order_id, user=request.user)
+    if order.payment_status == 'paid':
+        return redirect('orders:order_detail', order_id=order.pk)
     return render(request, 'payments/payment_select.html', {
         'order': order,
         'stripe_public_key': settings.STRIPE_PUBLIC_KEY,
@@ -27,7 +27,7 @@ def payment_select(request, order_id):
 
 @login_required
 def stripe_checkout(request, order_id):
-    order = get_object_or_404(Order, pk=order_id, user=request.user, status='pending')
+    order = get_object_or_404(Order, pk=order_id, user=request.user)
 
     session = stripe.checkout.Session.create(
         payment_method_types=['card'],
@@ -73,7 +73,8 @@ def stripe_success(request, order_id):
                     'amount': Decimal(str(order.total)),
                 }
             )
-            order.status = 'paid'
+            order.status = 'preparing'
+            order.payment_status = 'paid'
             order.save()
             messages.success(request, _('¡Pago realizado con éxito!'))
 
@@ -82,7 +83,7 @@ def stripe_success(request, order_id):
 
 @login_required
 def mp_checkout(request, order_id):
-    order = get_object_or_404(Order, pk=order_id, user=request.user, status='pending')
+    order = get_object_or_404(Order, pk=order_id, user=request.user)
 
     sdk = mercadopago.SDK(settings.MP_ACCESS_TOKEN)
 
@@ -106,7 +107,6 @@ def mp_checkout(request, order_id):
                 reverse('payments:mp_success', args=[order.pk])
             ),
         },
-        
         'external_reference': str(order.pk),
     }
 
@@ -132,7 +132,8 @@ def mp_success(request, order_id):
                 'amount': Decimal(str(order.total)),
             }
         )
-        order.status = 'paid'
+        order.status = 'preparing'
+        order.payment_status = 'paid'
         order.save()
         messages.success(request, _('¡Pago realizado con éxito con Mercado Pago!'))
     elif payment_status == 'pending':
@@ -147,7 +148,9 @@ def mp_success(request, order_id):
         )
         messages.info(request, _('Tu pago está pendiente de confirmación.'))
     else:
-        messages.error(request, _('El pago no fue aprobado.'))
+        order.payment_status = 'failed'
+        order.save()
+        messages.error(request, _('El pago no fue aprobado. Intentá con otro método.'))
 
     return redirect('orders:order_detail', order_id=order.pk)
 
