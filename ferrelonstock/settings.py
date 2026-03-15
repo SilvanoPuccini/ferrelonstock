@@ -132,3 +132,11 @@ CART_SESSION_ID = 'cart'
 
 # Email (development - muestra emails en consola)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Stripe
+STRIPE_PUBLIC_KEY = env('STRIPE_PUBLIC_KEY')
+STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY')
+
+# Mercado Pago
+MP_PUBLIC_KEY = env('MP_PUBLIC_KEY')
+MP_ACCESS_TOKEN = env('MP_ACCESS_TOKEN')

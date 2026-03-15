@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Mis pedidos" %}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <h1 class="text-2xl font-bold text-gray-900 mb-8">{% trans "Mis pedidos" %}</h1>
+
+    {% if orders %}
+    <div class="space-y-4">
+        {% for order in orders %}
+        <a href="{% url 'orders:order_detail' order.pk %}" class="block bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-3 mb-1">
+                        <span class="font-bold text-gray-900">{% trans "Pedido" %} #{{ order.pk }}</span>
+                        <span class="bg-{{ order.status_color }}-50 text-{{ order.status_color }}-700 px-3 py-1 rounded-full text-xs font-medium">{{ order.get_status_display }}</span>
+                    </div>
+                    <p class="text-sm text-gray-500">{{ order.created_at|date:"d/m/Y H:i" }} — {{ order.total_items }} {% trans "items" %}</p>
+                </div>
+                <span class="text-xl font-bold text-primary-700">${{ order.total|floatformat:0 }}</span>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-16">
+        <span class="text-6xl block mb-4">📦</span>
+        <h3 class="text-lg font-semibold text-gray-700 mb-2">{% trans "No tenés pedidos todavía" %}</h3>
+        <a href="{% url 'shop:product_list' %}" class="inline-block mt-4 bg-primary-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-primary-700 transition text-sm">{% trans "Ver productos" %}</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
