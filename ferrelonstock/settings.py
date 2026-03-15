@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
     'django.contrib.sites',
 
     # Third party
@@ -66,6 +67,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'cart.context_processors.cart',
                 'django.template.context_processors.i18n',
             ],
         },
@@ -127,3 +129,6 @@ LOGIN_URL = reverse_lazy('account_login')
 
 # Cart session key
 CART_SESSION_ID = 'cart'
+
+# Email (development - muestra emails en consola)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

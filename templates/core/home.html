@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Inicio" %}{% endblock %}
+
+{% block content %}
+<section class="bg-gradient-to-r from-primary-600 to-primary-800 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div class="max-w-2xl">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">{% trans "Todo para tu obra en un solo lugar" %}</h1>
+            <p class="text-lg text-primary-100 mb-8">{% trans "Ferretería y corralón online. Herramientas, materiales de construcción y más, con envío a todo Chile." %}</p>
+            <a href="{% url 'shop:product_list' %}" class="inline-block bg-white text-primary-700 font-semibold px-8 py-3 rounded-lg hover:bg-primary-50 transition">{% trans "Ver productos" %}</a>
+        </div>
+    </div>
+</section>
+
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <h2 class="text-2xl font-bold text-center mb-10">{% trans "¿Por qué elegirnos?" %}</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="text-center p-6">
+            <div class="text-4xl mb-4">🚚</div>
+            <h3 class="font-semibold text-lg mb-2">{% trans "Envío rápido" %}</h3>
+            <p class="text-gray-600 text-sm">{% trans "Despacho en 24-48 horas a todo Chile." %}</p>
+        </div>
+        <div class="text-center p-6">
+            <div class="text-4xl mb-4">💳</div>
+            <h3 class="font-semibold text-lg mb-2">{% trans "Pago seguro" %}</h3>
+            <p class="text-gray-600 text-sm">{% trans "Stripe y Mercado Pago. Tu compra protegida." %}</p>
+        </div>
+        <div class="text-center p-6">
+            <div class="text-4xl mb-4">⭐</div>
+            <h3 class="font-semibold text-lg mb-2">{% trans "Calidad garantizada" %}</h3>
+            <p class="text-gray-600 text-sm">{% trans "Marcas líderes del mercado ferretero." %}</p>
+        </div>
+    </div>
+</section>
+{% endblock %}
