@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Pedido" %} #{{ order.pk }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <nav class="flex mb-6 text-sm text-gray-500">
+        <a href="{% url 'orders:order_history' %}" class="hover:text-primary-600">{% trans "Mis pedidos" %}</a>
+        <span class="mx-2">/</span>
+        <span class="text-gray-900 font-medium">{% trans "Pedido" %} #{{ order.pk }}</span>
+    </nav>
+
+    <div class="flex items-center justify-between mb-8">
+        <h1 class="text-2xl font-bold text-gray-900">{% trans "Pedido" %} #{{ order.pk }}</h1>
+        <span class="bg-{{ order.status_color }}-50 text-{{ order.status_color }}-700 px-4 py-2 rounded-full text-sm font-medium">{{ order.get_status_display }}</span>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <div class="lg:col-span-2 space-y-4">
+            {% for item in order.items.all %}
+            <div class="flex gap-4 p-4 bg-white rounded-xl border border-gray-200">
+                <div class="w-16 h-16 bg-gray-100 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden">
+                    {% if item.product.image %}
+                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <span class="text-2xl text-gray-300">🔧</span>
+                    {% endif %}
+                </div>
+                <div class="flex-grow">
+                    <h3 class="font-semibold text-gray-900 text-sm">{{ item.product.name }}</h3>
+                    <p class="text-sm text-gray-500 mt-1">{{ item.quantity }} x ${{ item.price|floatformat:0 }}</p>
+                </div>
+                <span class="font-bold text-primary-700">${{ item.get_total|floatformat:0 }}</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="space-y-6">
+            <div class="bg-white rounded-xl border border-gray-200 p-6">
+                <h2 class="font-semibold text-gray-900 mb-4">{% trans "Resumen" %}</h2>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">{% trans "Items" %}</span>
+                        <span>{{ order.total_items }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">{% trans "Envío" %}</span>
+                        <span class="text-green-600 font-medium">{% trans "Gratis" %}</span>
+                    </div>
+                    <div class="flex justify-between pt-2 border-t border-gray-200">
+                        <span class="font-bold">{% trans "Total" %}</span>
+                        <span class="text-xl font-bold text-primary-700">${{ order.total|floatformat:0 }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-gray-200 p-6">
+                <h2 class="font-semibold text-gray-900 mb-4">{% trans "Envío" %}</h2>
+                <div class="text-sm text-gray-600 space-y-1">
+                    <p class="font-medium text-gray-900">{{ order.first_name }} {{ order.last_name }}</p>
+                    <p>{{ order.address }}</p>
+                    <p>{{ order.city }}{% if order.region %}, {{ order.region }}{% endif %}</p>
+                    {% if order.postal_code %}<p>CP: {{ order.postal_code }}</p>{% endif %}
+                    {% if order.phone %}<p>Tel: {{ order.phone }}</p>{% endif %}
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-gray-200 p-6">
+                <h2 class="font-semibold text-gray-900 mb-4">{% trans "Info" %}</h2>
+                <div class="text-sm text-gray-600 space-y-1">
+                    <p>{% trans "Fecha" %}: {{ order.created_at|date:"d/m/Y H:i" }}</p>
+                    <p>{% trans "Email" %}: {{ order.email }}</p>
+                    {% if order.notes %}<p>{% trans "Notas" %}: {{ order.notes }}</p>{% endif %}
+                </div>
+
+            {% if order.status == "pending" %}
+            <a href="{% url 'payments:payment_select' order.pk %}" class="block w-full text-center bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition text-sm mt-6">
+                {% trans "Pagar ahora" %}
+            </a>
+            {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

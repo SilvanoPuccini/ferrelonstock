@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Pedido confirmado" %}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+    <div class="bg-white rounded-2xl border border-gray-200 p-10">
+        <span class="text-6xl block mb-6">✅</span>
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">{% trans "¡Pedido confirmado!" %}</h1>
+        <p class="text-gray-500 mb-6">{% trans "Tu pedido" %} <span class="font-bold text-primary-700">#{{ order.pk }}</span> {% trans "fue creado con éxito." %}</p>
+
+        <div class="bg-gray-50 rounded-xl p-6 text-left mb-8 space-y-2 text-sm">
+            <div class="flex justify-between">
+                <span class="text-gray-500">{% trans "Enviado a" %}</span>
+                <span class="font-medium">{{ order.first_name }} {{ order.last_name }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">{% trans "Dirección" %}</span>
+                <span class="font-medium">{{ order.address }}, {{ order.city }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">{% trans "Items" %}</span>
+                <span class="font-medium">{{ order.total_items }} {% trans "productos" %}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">{% trans "Total" %}</span>
+                <span class="font-bold text-primary-700 text-lg">${{ order.total|floatformat:0 }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-500">{% trans "Estado" %}</span>
+                <span class="bg-yellow-50 text-yellow-700 px-3 py-1 rounded-full text-xs font-medium">{% trans "Pendiente de pago" %}</span>
+            </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <a href="{% url 'orders:order_detail' order.pk %}" class="bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700 transition text-sm">{% trans "Ver detalle del pedido" %}</a>
+            <a href="{% url 'shop:product_list' %}" class="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 transition text-sm">{% trans "Seguir comprando" %}</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

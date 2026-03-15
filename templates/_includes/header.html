@@ -17,7 +17,7 @@
             <div class="flex items-center gap-4">
                 {% if user.is_authenticated %}
                     <div class="hidden md:flex items-center gap-3">
-                        <span class="text-sm text-gray-600">{{ user.email }}</span>
+                        <a href="{% url 'orders:order_history' %}" class="text-sm text-gray-600 hover:text-primary-600">{{ user.email }}</a>
                         <a href="{% url 'account_logout' %}" class="text-sm text-red-600 hover:text-red-700 font-medium">{% trans "Salir" %}</a>
                     </div>
                 {% else %}
