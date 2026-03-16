@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+    @page { size: A4; margin: 2cm; }
+    body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #1a1a1a; line-height: 1.5; }
+    .header { display: flex; justify-content: space-between; margin-bottom: 30px; border-bottom: 2px solid #e65100; padding-bottom: 20px; }
+    .company { }
+    .company h1 { font-size: 22px; color: #e65100; margin: 0 0 5px; }
+    .company p { margin: 1px 0; font-size: 10px; color: #666; }
+    .invoice-box { text-align: right; }
+    .invoice-box h2 { font-size: 16px; color: #333; margin: 0 0 5px; }
+    .invoice-box .number { font-size: 20px; font-weight: bold; color: #e65100; }
+    .invoice-box p { margin: 2px 0; font-size: 10px; color: #666; }
+    .meta { display: flex; justify-content: space-between; margin-bottom: 25px; }
+    .meta-box { width: 48%; background: #f8f8f8; padding: 12px; border-radius: 6px; }
+    .meta-box h3 { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #999; margin: 0 0 6px; }
+    .meta-box p { margin: 2px 0; font-size: 11px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    thead th { background: #f5f5f5; text-align: left; padding: 10px 8px; font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: #666; border-bottom: 2px solid #ddd; }
+    thead th.right { text-align: right; }
+    tbody td { padding: 10px 8px; border-bottom: 1px solid #eee; font-size: 11px; }
+    tbody td.right { text-align: right; }
+    tbody td.product-name { font-weight: bold; }
+    .totals { width: 300px; margin-left: auto; }
+    .totals table { margin-bottom: 0; }
+    .totals td { padding: 6px 8px; border: none; }
+    .totals .label { text-align: right; color: #666; font-size: 11px; }
+    .totals .value { text-align: right; font-size: 11px; }
+    .totals .total-row td { border-top: 2px solid #e65100; font-size: 14px; font-weight: bold; }
+    .totals .total-row .value { color: #e65100; }
+    .badges { margin-bottom: 20px; }
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: bold; margin-right: 6px; }
+    .badge-green { background: #e8f5e9; color: #2e7d32; }
+    .badge-blue { background: #e3f2fd; color: #1565c0; }
+    .badge-orange { background: #fff3e0; color: #e65100; }
+    .footer { margin-top: 40px; padding-top: 15px; border-top: 1px solid #ddd; font-size: 9px; color: #999; text-align: center; }
+    .legal { margin-top: 20px; padding: 12px; background: #fafafa; border-radius: 6px; font-size: 9px; color: #888; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<!-- Encabezado -->
+<table style="width:100%; margin-bottom: 25px; border-bottom: 2px solid #e65100; padding-bottom: 15px;">
+<tr>
+<td style="border:none; padding:0;">
+    <div style="font-size: 22px; font-weight: bold; color: #e65100; margin-bottom: 4px;">FerrelonStock</div>
+    <div style="font-size: 10px; color: #666;">Ferretería &amp; Corralón Online</div>
+    <div style="font-size: 10px; color: #666;">Av. Corrientes 1234, CABA, Buenos Aires</div>
+    <div style="font-size: 10px; color: #666;">CUIT: 30-12345678-9</div>
+    <div style="font-size: 10px; color: #666;">info@ferrelonstock.com | +54 11 5573-9987</div>
+</td>
+<td style="border:none; padding:0; text-align: right;">
+    <div style="font-size: 12px; color: #333; font-weight: bold;">COMPROBANTE DE VENTA</div>
+    <div style="font-size: 24px; font-weight: bold; color: #e65100; margin: 4px 0;">#{{ order.pk|stringformat:"04d" }}</div>
+    <div style="font-size: 10px; color: #666;">Fecha: {{ order.created_at|date:"d/m/Y" }}</div>
+    <div style="font-size: 10px; color: #666;">Hora: {{ order.created_at|date:"H:i" }} hs</div>
+    <div style="margin-top: 6px;">
+        {% if order.payment_status == 'paid' %}
+        <span style="background: #e8f5e9; color: #2e7d32; padding: 3px 10px; border-radius: 10px; font-size: 9px; font-weight: bold;">PAGADO</span>
+        {% else %}
+        <span style="background: #fff3e0; color: #e65100; padding: 3px 10px; border-radius: 10px; font-size: 9px; font-weight: bold;">PENDIENTE</span>
+        {% endif %}
+    </div>
+</td>
+</tr>
+</table>
+
+<!-- Datos del cliente y envío -->
+<table style="width:100%; margin-bottom: 25px;">
+<tr>
+<td style="width:48%; background: #f8f8f8; padding: 12px; border-radius: 6px; border: none; vertical-align: top;">
+    <div style="font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #999; margin-bottom: 6px;">Datos del cliente</div>
+    <div style="font-size: 12px; font-weight: bold;">{{ order.first_name }} {{ order.last_name }}</div>
+    <div style="font-size: 10px; color: #666;">{{ order.email }}</div>
+    {% if order.phone %}<div style="font-size: 10px; color: #666;">Tel: {{ order.phone }}</div>{% endif %}
+</td>
+<td style="width:4%; border:none;"></td>
+<td style="width:48%; background: #f8f8f8; padding: 12px; border-radius: 6px; border: none; vertical-align: top;">
+    <div style="font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #999; margin-bottom: 6px;">Dirección de entrega</div>
+    <div style="font-size: 11px;">{{ order.address }}</div>
+    <div style="font-size: 11px;">{{ order.city }}{% if order.region %}, {{ order.region }}{% endif %}</div>
+    {% if order.postal_code %}<div style="font-size: 11px;">CP: {{ order.postal_code }}</div>{% endif %}
+</td>
+</tr>
+</table>
+
+<!-- Detalle de productos -->
+<table>
+<thead>
+<tr>
+    <th style="width: 50%;">Producto</th>
+    <th class="right">Precio unit.</th>
+    <th class="right">Cantidad</th>
+    <th class="right">Subtotal</th>
+</tr>
+</thead>
+<tbody>
+{% for item in items %}
+<tr>
+    <td class="product-name">{{ item.product.name }}</td>
+    <td class="right">${{ item.price|floatformat:0 }}</td>
+    <td class="right">{{ item.quantity }}</td>
+    <td class="right">${{ item.get_total|floatformat:0 }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+<!-- Totales -->
+<table style="width: 300px; margin-left: auto;">
+<tr>
+    <td style="text-align: right; color: #666; border: none; padding: 6px 8px;">Subtotal productos</td>
+    <td style="text-align: right; border: none; padding: 6px 8px;">
+        {% widthratio 1 1 1 as dummy %}
+        ${{ order.total|floatformat:0 }}
+    </td>
+</tr>
+<tr>
+    <td style="text-align: right; color: #666; border: none; padding: 6px 8px;">
+        Envío{% if order.shipping_method %} ({{ order.shipping_method.name }}){% endif %}
+    </td>
+    <td style="text-align: right; border: none; padding: 6px 8px;">
+        {% if order.shipping_price > 0 %}${{ order.shipping_price|floatformat:0 }}{% else %}Gratis{% endif %}
+    </td>
+</tr>
+<tr>
+    <td style="text-align: right; font-size: 14px; font-weight: bold; border-top: 2px solid #e65100; padding: 10px 8px; border-bottom: none;">Total</td>
+    <td style="text-align: right; font-size: 14px; font-weight: bold; color: #e65100; border-top: 2px solid #e65100; padding: 10px 8px; border-bottom: none;">${{ order.total|floatformat:0 }}</td>
+</tr>
+</table>
+
+<!-- Info legal -->
+<div style="margin-top: 40px; padding: 12px; background: #fafafa; border-radius: 6px; font-size: 9px; color: #888; line-height: 1.6;">
+    <strong>Información legal:</strong> Este comprobante no constituye factura fiscal. Para solicitar factura tipo A o B, contacte a info@ferrelonstock.com indicando su CUIT/CUIL y condición frente al IVA. Los precios incluyen IVA según Ley 23.349. Derecho de arrepentimiento: Ley 24.240 de Defensa del Consumidor (Argentina). Plazo de devolución: 10 días corridos desde la recepción. Resolución de conflictos: Dirección Nacional de Defensa del Consumidor.
+</div>
+
+<!-- Pie -->
+<div style="margin-top: 20px; text-align: center; font-size: 9px; color: #aaa; border-top: 1px solid #ddd; padding-top: 10px;">
+    FerrelonStock S.A. | Av. Corrientes 1234, CABA, Buenos Aires, Argentina | CUIT: 30-12345678-9<br>
+    www.ferrelonstock.com | info@ferrelonstock.com | +54 11 5573-9987
+</div>
+
+</body>
+</html>

@@ -1,5 +1,8 @@
 from pathlib import Path
 import environ
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 from django.urls import reverse_lazy
 
 # Build paths
@@ -22,6 +25,8 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'cloudinary_storage',
+    'cloudinary',
     'django.contrib.staticfiles',
     'django.contrib.postgres',
     'django.contrib.sites',
@@ -146,3 +151,14 @@ MP_ACCESS_TOKEN = env('MP_ACCESS_TOKEN')
 
 # Shipping webhook
 SHIPPING_WEBHOOK_SECRET = env('SHIPPING_WEBHOOK_SECRET', default='change-me')
+
+# Cloudinary
+cloudinary.config(
+    cloud_name=env('CLOUDINARY_CLOUD_NAME', default=''),
+    api_key=env('CLOUDINARY_API_KEY', default=''),
+    api_secret=env('CLOUDINARY_API_SECRET', default=''),
+)
+
+# En producción usa Cloudinary, en desarrollo usa local
+if not DEBUG:
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'

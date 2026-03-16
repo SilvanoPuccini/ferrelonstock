@@ -52,7 +52,25 @@ def checkout(request):
                     product.stock = 0
                     product.available = False
                 product.save()
+	   # Guardar datos en el perfil si están vacíos
+            profile = request.user.profile
+            if not profile.phone and order.phone:
+                profile.phone = order.phone
+            if not profile.address and order.address:
+                profile.address = order.address
+            if not profile.city and order.city:
+                profile.city = order.city
+            if not profile.region and order.region:
+                profile.region = order.region
+            if not profile.postal_code and order.postal_code:
+                profile.postal_code = order.postal_code
+            profile.save()
 
+            if not request.user.first_name and order.first_name:
+                request.user.first_name = order.first_name
+                request.user.last_name = order.last_name
+                request.user.save() 
+	   
             cart.clear()
             messages.success(request, _(f'¡Pedido #{order.pk} creado con éxito!'))
             return redirect('payments:payment_select', order_id=order.pk)
