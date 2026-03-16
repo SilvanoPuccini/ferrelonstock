@@ -5,8 +5,8 @@ from django.urls import reverse
 class Category(models.Model):
     name = models.CharField('Nombre', max_length=200)
     slug = models.SlugField('Slug', max_length=200, unique=True)
-    description = models.TextField('Descripción', blank=True)
     image = models.ImageField('Imagen', upload_to='categories/', blank=True, null=True)
+    description = models.TextField('Descripción', blank=True)
     created_at = models.DateTimeField('Fecha de creación', auto_now_add=True)
 
     class Meta:
@@ -52,6 +52,7 @@ class Product(models.Model):
     slug = models.SlugField('Slug', max_length=200, unique=True)
     description = models.TextField('Descripción', blank=True)
     price = models.DecimalField('Precio', max_digits=10, decimal_places=2)
+    discount_price = models.DecimalField('Precio de oferta', max_digits=10, decimal_places=2, null=True, blank=True, help_text='Dejá vacío si no tiene descuento')
     stock = models.PositiveIntegerField('Stock', default=0)
     image = models.ImageField('Imagen', upload_to='products/', blank=True, null=True)
     available = models.BooleanField('Disponible', default=True)
@@ -73,3 +74,33 @@ class Product(models.Model):
     @property
     def in_stock(self):
         return self.stock > 0 and self.available
+
+    @property
+    def has_discount(self):
+        return self.discount_price is not None and self.discount_price < self.price
+
+    @property
+    def discount_percent(self):
+        if self.has_discount:
+            return int(100 - (self.discount_price * 100 / self.price))
+        return 0
+
+    @property
+    def final_price(self):
+        if self.has_discount:
+            return self.discount_price
+        return self.price
+
+
+class ProductImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images', verbose_name='Producto')
+    image = models.ImageField('Imagen', upload_to='products/gallery/')
+    order = models.PositiveIntegerField('Orden', default=0)
+
+    class Meta:
+        verbose_name = 'Imagen del producto'
+        verbose_name_plural = 'Imágenes del producto'
+        ordering = ['order']
+
+    def __str__(self):
+        return f'Imagen {self.order} de {self.product.name}'

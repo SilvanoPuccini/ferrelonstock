@@ -4,56 +4,71 @@
 {% block title %}{% trans "Inicio" %}{% endblock %}
 
 {% block content %}
-<!-- Hero -->
-<section class="bg-gradient-to-r from-primary-600 to-primary-800 text-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+<!-- Hero con imagen de fondo + buscador -->
+<section class="relative bg-dark-900 text-white overflow-hidden">
+    <img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1600&h=600&fit=crop" alt="" class="absolute inset-0 w-full h-full object-cover opacity-30">
+    <div class="absolute inset-0 bg-gradient-to-r from-dark-900/90 to-dark-900/50"></div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div class="max-w-2xl">
             <h1 class="text-4xl md:text-5xl font-bold mb-4">{% trans "Todo para tu obra en un solo lugar" %}</h1>
-            <p class="text-lg text-primary-100 mb-8">{% trans "Ferretería y corralón online. Herramientas, materiales de construcción y más, con envío a todo el país." %}</p>
-            <a href="{% url 'shop:product_list' %}" class="inline-block bg-white text-primary-700 font-semibold px-8 py-3 rounded-lg hover:bg-primary-50 transition">{% trans "Ver productos" %}</a>
+            <p class="text-lg text-gray-300 mb-8">{% trans "Ferretería y corralón online. Herramientas, materiales de construcción y más, con envío a todo el país." %}</p>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <a href="{% url 'shop:product_list' %}" class="inline-block bg-primary-600 text-white font-semibold px-8 py-3 rounded-lg hover:bg-primary-700 transition text-center">{% trans "Ver productos" %}</a>
+            </div>
+            <!-- Buscador -->
+            <form action="{% url 'shop:product_list' %}" method="GET" class="mt-6">
+                <div class="relative max-w-lg">
+                    <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/70" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+                    <input type="text" name="q" placeholder="{% trans "¿Qué estás buscando para tu obra?" %}"
+                        class="w-full pl-12 pr-4 py-3.5 rounded-xl bg-white/20 text-white placeholder-white/60 border border-white/30 shadow-lg focus:bg-white/30 focus:border-primary-400 focus:ring-2 focus:ring-primary-400/50 focus:outline-none transition text-sm">
+                </div>
+            </form>
         </div>
     </div>
 </section>
 
-<!-- Categorías -->
+<!-- Categorías principales con imágenes -->
 {% if categories %}
 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-    <h2 class="text-2xl font-bold text-center mb-10">{% trans "Categorías" %}</h2>
+    <div class="flex items-center justify-between mb-8">
+        <h2 class="text-2xl font-bold text-gray-900">{% trans "Categorías principales" %}</h2>
+        <a href="{% url 'shop:product_list' %}" class="text-primary-600 hover:text-primary-700 font-medium text-sm">{% trans "Ver todas" %} →</a>
+    </div>
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {% for cat in categories %}
-        <a href="{{ cat.get_absolute_url }}" class="group bg-white rounded-xl border border-gray-200 p-6 text-center hover:shadow-md hover:border-primary-300 transition">
-            <div class="w-14 h-14 mx-auto mb-3 flex items-center justify-center rounded-xl bg-primary-50 text-primary-600 group-hover:bg-primary-100 group-hover:text-primary-700 transition">
-                {% if cat.slug == "herramientas-manuales" %}
-                <!-- Llave inglesa -->
-                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.048.58.024 1.194-.14 1.743" /></svg>
-                {% elif cat.slug == "herramientas-electricas" %}
-                <!-- Rayo / potencia -->
-                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>
-                {% elif cat.slug == "electricidad" %}
-                <!-- Lamparita -->
-                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" /></svg>
-                {% elif cat.slug == "pinturas-y-revestimientos" %}
-                <!-- Pincel / brocha -->
-                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" /></svg>
-                {% elif cat.slug == "plomeria" %}
-                <!-- Grifo / agua -->
-                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2.25c-2.429 0-4.614.966-6.218 2.535M12 2.25c2.429 0 4.614.966 6.218 2.535M12 2.25v3m0 0a3.75 3.75 0 00-3.75 3.75v1.5a3.75 3.75 0 003.75 3.75m0-9a3.75 3.75 0 013.75 3.75v1.5a3.75 3.75 0 01-3.75 3.75m0 0v5.25m-3-3h6" /></svg>
-                {% elif cat.slug == "materiales-de-construccion" %}
-                <!-- Edificio -->
-                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 0h.008v.008h-.008V7.5z" /></svg>
-                {% else %}
-                <!-- Caja genérica -->
-                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" /></svg>
-                {% endif %}
+        <a href="{{ cat.get_absolute_url }}" class="group relative rounded-xl overflow-hidden aspect-square">
+            {% if cat.image %}
+                <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+            {% else %}
+                <div class="w-full h-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
+                    {% if cat.slug == "herramientas-manuales" %}
+                    <svg class="w-10 h-10 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.048.58.024 1.194-.14 1.743" /></svg>
+                    {% elif cat.slug == "herramientas-electricas" %}
+                    <svg class="w-10 h-10 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>
+                    {% elif cat.slug == "electricidad" %}
+                    <svg class="w-10 h-10 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" /></svg>
+                    {% elif cat.slug == "pinturas-y-revestimientos" %}
+                    <svg class="w-10 h-10 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" /></svg>
+                    {% elif cat.slug == "plomeria" %}
+                    <svg class="w-10 h-10 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2.25c-2.429 0-4.614.966-6.218 2.535M12 2.25c2.429 0 4.614.966 6.218 2.535M12 2.25v3m0 0a3.75 3.75 0 00-3.75 3.75v1.5a3.75 3.75 0 003.75 3.75m0-9a3.75 3.75 0 013.75 3.75v1.5a3.75 3.75 0 01-3.75 3.75m0 0v5.25m-3-3h6" /></svg>
+                    {% elif cat.slug == "materiales-de-construccion" %}
+                    <svg class="w-10 h-10 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 0h.008v.008h-.008V7.5z" /></svg>
+                    {% else %}
+                    <svg class="w-10 h-10 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" /></svg>
+                    {% endif %}
+                </div>
+            {% endif %}
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-3">
+                <h3 class="text-white font-semibold text-sm text-center">{{ cat.name }}</h3>
             </div>
-            <h3 class="text-sm font-semibold text-gray-900 group-hover:text-primary-600 transition">{{ cat.name }}</h3>
         </a>
         {% endfor %}
     </div>
 </section>
 {% endif %}
 
-<!-- Productos destacados - Pasarela + puntitos -->
+<!-- Productos destacados - Pasarela -->
 {% if featured_products %}
 <section class="bg-gray-50 py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -87,23 +102,31 @@
             }
         }" @mouseenter="paused = true" @mouseleave="paused = false">
 
-            <div x-ref="carousel"
-                class="flex gap-6 overflow-x-hidden pb-4"
-                style="scrollbar-width: none; -ms-overflow-style: none;">
+            <div x-ref="carousel" class="flex gap-6 overflow-x-hidden pb-4" style="scrollbar-width: none; -ms-overflow-style: none;">
                 {% for product in featured_products %}
-                <a href="{{ product.get_absolute_url }}" class="group flex-shrink-0 w-64 bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition">
+                <a href="{{ product.get_absolute_url }}" class="group flex-shrink-0 w-64 bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition relative">
+                    {% if product.has_discount %}
+                    <span class="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg z-10">-{{ product.discount_percent }}%</span>
+                    {% endif %}
                     <div class="aspect-square bg-gray-100 flex items-center justify-center overflow-hidden">
                         {% if product.image %}
                             <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
                         {% else %}
-                            <span class="text-5xl text-gray-300">🔧</span>
+                            <svg class="w-12 h-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.048.58.024 1.194-.14 1.743" /></svg>
                         {% endif %}
                     </div>
                     <div class="p-4">
                         <span class="text-xs text-primary-600 font-medium">{{ product.category.name }}</span>
                         <h3 class="font-semibold text-gray-900 mt-1 group-hover:text-primary-600 transition text-sm">{{ product.name }}</h3>
                         <div class="flex items-center justify-between mt-2">
-                            <span class="text-lg font-bold text-primary-700">${{ product.price|floatformat:0 }}</span>
+                            {% if product.has_discount %}
+                                <div class="flex items-center gap-2">
+                                    <span class="text-lg font-bold text-primary-700">${{ product.discount_price|floatformat:0 }}</span>
+                                    <span class="text-sm text-gray-400 line-through">${{ product.price|floatformat:0 }}</span>
+                                </div>
+                            {% else %}
+                                <span class="text-lg font-bold text-primary-700">${{ product.price|floatformat:0 }}</span>
+                            {% endif %}
                             {% if product.in_stock %}
                                 <span class="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full font-medium">{% trans "Stock" %}</span>
                             {% endif %}
@@ -112,19 +135,29 @@
                 </a>
                 {% endfor %}
                 {% for product in featured_products %}
-                <a href="{{ product.get_absolute_url }}" class="group flex-shrink-0 w-64 bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition" aria-hidden="true">
+                <a href="{{ product.get_absolute_url }}" class="group flex-shrink-0 w-64 bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition relative" aria-hidden="true">
+                    {% if product.has_discount %}
+                    <span class="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg z-10">-{{ product.discount_percent }}%</span>
+                    {% endif %}
                     <div class="aspect-square bg-gray-100 flex items-center justify-center overflow-hidden">
                         {% if product.image %}
                             <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
                         {% else %}
-                            <span class="text-5xl text-gray-300">🔧</span>
+                            <svg class="w-12 h-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.048.58.024 1.194-.14 1.743" /></svg>
                         {% endif %}
                     </div>
                     <div class="p-4">
                         <span class="text-xs text-primary-600 font-medium">{{ product.category.name }}</span>
                         <h3 class="font-semibold text-gray-900 mt-1 group-hover:text-primary-600 transition text-sm">{{ product.name }}</h3>
                         <div class="flex items-center justify-between mt-2">
-                            <span class="text-lg font-bold text-primary-700">${{ product.price|floatformat:0 }}</span>
+                            {% if product.has_discount %}
+                                <div class="flex items-center gap-2">
+                                    <span class="text-lg font-bold text-primary-700">${{ product.discount_price|floatformat:0 }}</span>
+                                    <span class="text-sm text-gray-400 line-through">${{ product.price|floatformat:0 }}</span>
+                                </div>
+                            {% else %}
+                                <span class="text-lg font-bold text-primary-700">${{ product.price|floatformat:0 }}</span>
+                            {% endif %}
                             {% if product.in_stock %}
                                 <span class="text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded-full font-medium">{% trans "Stock" %}</span>
                             {% endif %}
@@ -134,7 +167,6 @@
                 {% endfor %}
             </div>
 
-            <!-- Puntitos -->
             <div class="flex justify-center gap-2 mt-6">
                 {% for product in featured_products %}
                 <button @click="goTo({{ forloop.counter0 }})"
@@ -151,7 +183,7 @@
 <!-- Features -->
 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
     <h2 class="text-2xl font-bold text-center mb-10">{% trans "¿Por qué elegirnos?" %}</h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div class="text-center p-6">
             <div class="w-14 h-14 mx-auto mb-4 flex items-center justify-center rounded-xl bg-blue-50 text-blue-600">
                 <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" /></svg>
@@ -173,18 +205,40 @@
             <h3 class="font-semibold text-lg mb-2">{% trans "Calidad garantizada" %}</h3>
             <p class="text-gray-600 text-sm">{% trans "Marcas líderes del mercado ferretero." %}</p>
         </div>
+        <div class="text-center p-6">
+            <div class="w-14 h-14 mx-auto mb-4 flex items-center justify-center rounded-xl bg-primary-50 text-primary-600">
+                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" /><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" /></svg>
+            </div>
+            <h3 class="font-semibold text-lg mb-2">{% trans "Mejores precios" %}</h3>
+            <p class="text-gray-600 text-sm">{% trans "Ofertas exclusivas y descuentos permanentes." %}</p>
+        </div>
     </div>
 </section>
 
-<!-- CTA -->
+<!-- Newsletter / Cotización (según login) -->
 <section class="bg-dark-900 text-white py-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-2xl font-bold mb-4">{% trans "¿Necesitás ayuda con tu proyecto?" %}</h2>
-        <p class="text-gray-400 mb-6">{% trans "Nuestro equipo te asesora por WhatsApp." %}</p>
-        <a href="https://api.whatsapp.com/send?text=Hola%20FerrelonStock%2C%20tengo%20una%20consulta" target="_blank" class="inline-flex items-center gap-2 bg-green-500 text-white font-semibold px-8 py-3 rounded-lg hover:bg-green-600 transition">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-            {% trans "Chateá con nosotros" %}
-        </a>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {% if user.is_authenticated %}
+        <div class="text-center">
+            <h2 class="text-2xl font-bold mb-3">{% trans "Cotizá tu lista de materiales" %}</h2>
+            <p class="text-gray-400 mb-6 max-w-xl mx-auto">{% trans "Envianos tu lista de materiales por WhatsApp y recibí una propuesta con los mejores precios para tu proyecto." %}</p>
+            <a href="https://api.whatsapp.com/send?text=Hola%20FerrelonStock%2C%20necesito%20cotizar%20materiales%20para%20mi%20proyecto" target="_blank" class="inline-flex items-center gap-2 bg-green-500 text-white font-semibold px-8 py-3 rounded-lg hover:bg-green-600 transition">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                {% trans "Solicitar cotización" %}
+            </a>
+        </div>
+        {% else %}
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+                <h2 class="text-2xl font-bold mb-2">{% trans "¡No te pierdas ninguna oferta!" %}</h2>
+                <p class="text-gray-400">{% trans "Suscribite a nuestro boletín y recibí consejos de construcción y descuentos exclusivos." %}</p>
+            </div>
+            <form class="flex gap-3 w-full md:w-auto">
+                <input type="email" placeholder="{% trans "Tu correo electrónico" %}" class="px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:border-primary-400 focus:outline-none text-sm w-full md:w-72">
+                <button type="submit" class="bg-primary-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-primary-700 transition whitespace-nowrap text-sm">{% trans "Suscribirme" %}</button>
+            </form>
+        </div>
+        {% endif %}
     </div>
 </section>
 {% endblock %}
