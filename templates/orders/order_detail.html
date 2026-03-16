@@ -41,7 +41,6 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-        <!-- Items -->
         <div class="lg:col-span-2 space-y-4">
             {% for item in order.items.all %}
             <div class="flex gap-4 p-4 bg-white rounded-xl border border-gray-200">
@@ -60,7 +59,7 @@
             </div>
             {% endfor %}
 
-            <!-- Sección de mensajes / contacto con vendedor -->
+            <!-- Contactar al vendedor -->
             <div class="bg-white rounded-xl border border-gray-200 p-6 mt-6">
                 <h2 class="font-semibold text-gray-900 mb-4">💬 {% trans "Contactar al vendedor" %}</h2>
 
@@ -171,19 +170,16 @@
                 </div>
             </div>
 
+            <!-- Botones de acción según estado -->
             {% if order.payment_status == "unpaid" or order.payment_status == "failed" %}
             <a href="{% url 'payments:payment_select' order.pk %}" class="block w-full text-center bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition text-sm">
-                {% if order.payment_status == 'failed' %}
-                    {% trans "Reintentar pago" %}
-                {% else %}
-                    {% trans "Pagar ahora" %}
-                {% endif %}
+                {% if order.payment_status == 'failed' %}{% trans "Reintentar pago" %}{% else %}{% trans "Pagar ahora" %}{% endif %}
             </a>
             {% endif %}
 
-            {% if order.status == "shipped" or order.status == "delivered" %}
+            {% if order.payment_status == "paid" %}
             <a href="{% url 'shipping:tracking' order.pk %}" class="block w-full text-center bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition text-sm">
-                🚚 {% trans "Seguir envío" %}
+                🚚 {% trans "Seguimiento del envío" %}
             </a>
             {% endif %}
         </div>

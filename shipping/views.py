@@ -3,6 +3,7 @@ from django.shortcuts import render, get_object_or_404
 from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
 from cart.cart import Cart
+from orders.models import Order
 from .services import get_shipping_options, get_zones
 from .models import Shipment
 
@@ -23,13 +24,17 @@ def shipping_calculator(request):
 
 @login_required
 def tracking_view(request, order_id):
-    shipment = get_object_or_404(
-        Shipment,
-        order__pk=order_id,
-        order__user=request.user
-    )
-    events = shipment.events.all()
+    order = get_object_or_404(Order, pk=order_id, user=request.user)
+
+    try:
+        shipment = order.shipment
+        events = shipment.events.all()
+    except Shipment.DoesNotExist:
+        shipment = None
+        events = []
+
     return render(request, 'shipping/tracking.html', {
+        'order': order,
         'shipment': shipment,
         'events': events,
     })

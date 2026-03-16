@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "Seguimiento" %} - {% trans "Pedido" %} #{{ shipment.order.pk }}{% endblock %}
+{% block title %}{% trans "Seguimiento" %} - {% trans "Pedido" %} #{{ order.pk }}{% endblock %}
 
 {% block content %}
 <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -9,37 +9,49 @@
     <nav class="flex mb-6 text-sm text-gray-500">
         <a href="{% url 'orders:order_history' %}" class="hover:text-primary-600">{% trans "Mis pedidos" %}</a>
         <span class="mx-2">/</span>
-        <a href="{% url 'orders:order_detail' shipment.order.pk %}" class="hover:text-primary-600">{% trans "Pedido" %} #{{ shipment.order.pk }}</a>
+        <a href="{% url 'orders:order_detail' order.pk %}" class="hover:text-primary-600">{% trans "Pedido" %} #{{ order.pk }}</a>
         <span class="mx-2">/</span>
         <span class="text-gray-900 font-medium">{% trans "Seguimiento" %}</span>
     </nav>
 
     <h1 class="text-2xl font-bold text-gray-900 mb-2">{% trans "Seguimiento del envío" %}</h1>
-    <p class="text-gray-500 mb-8">{% trans "Pedido" %} #{{ shipment.order.pk }}</p>
+    <p class="text-gray-500 mb-8">{% trans "Pedido" %} #{{ order.pk }}</p>
 
-    <!-- Estado actual -->
+    <!-- Estado actual del pedido -->
     <div class="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
-        <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-3">
-                <span class="text-3xl">{{ shipment.status_icon }}</span>
-                <div>
-                    <p class="font-bold text-gray-900 text-lg">{{ shipment.get_status_display }}</p>
-                    {% if shipment.estimated_delivery %}
-                        <p class="text-sm text-gray-500">{% trans "Entrega estimada:" %} {{ shipment.estimated_delivery|date:"d/m/Y" }}</p>
-                    {% endif %}
-                </div>
-            </div>
-            {% if shipment.tracking_url %}
-                <a href="{{ shipment.tracking_url }}" target="_blank" class="bg-primary-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-primary-700 transition font-medium">
-                    {% trans "Ver en" %} {{ shipment.carrier.name }} ↗
-                </a>
+        <div class="flex items-center gap-3 mb-4">
+            {% if order.status == 'preparing' %}
+                <span class="text-3xl">📦</span>
+                <p class="font-bold text-gray-900 text-lg">{% trans "En preparación" %}</p>
+            {% elif order.status == 'shipped' %}
+                <span class="text-3xl">🚚</span>
+                <p class="font-bold text-gray-900 text-lg">{% trans "En camino" %}</p>
+            {% elif order.status == 'delivered' %}
+                <span class="text-3xl">✅</span>
+                <p class="font-bold text-gray-900 text-lg">{% trans "Entregado" %}</p>
+            {% else %}
+                <span class="text-3xl">⏳</span>
+                <p class="font-bold text-gray-900 text-lg">{% trans "Pendiente" %}</p>
             {% endif %}
         </div>
 
-        <!-- Barra de progreso -->
-        <div class="w-full bg-gray-100 rounded-full h-3 mb-2">
-            <div class="bg-primary-500 h-3 rounded-full transition-all duration-700" style="width: {{ shipment.progress_percent }}%"></div>
-        </div>
+        {% if order.status == 'preparing' %}
+            <div class="w-full bg-gray-100 rounded-full h-3 mb-2">
+                <div class="bg-primary-500 h-3 rounded-full transition-all duration-700" style="width: 33%"></div>
+            </div>
+        {% elif order.status == 'shipped' %}
+            <div class="w-full bg-gray-100 rounded-full h-3 mb-2">
+                <div class="bg-blue-500 h-3 rounded-full transition-all duration-700" style="width: 66%"></div>
+            </div>
+        {% elif order.status == 'delivered' %}
+            <div class="w-full bg-gray-100 rounded-full h-3 mb-2">
+                <div class="bg-green-500 h-3 rounded-full transition-all duration-700" style="width: 100%"></div>
+            </div>
+        {% else %}
+            <div class="w-full bg-gray-100 rounded-full h-3 mb-2">
+                <div class="bg-gray-300 h-3 rounded-full" style="width: 10%"></div>
+            </div>
+        {% endif %}
         <div class="flex justify-between text-xs text-gray-400">
             <span>{% trans "Preparando" %}</span>
             <span>{% trans "En camino" %}</span>
@@ -47,72 +59,162 @@
         </div>
     </div>
 
-    <!-- Info del envío -->
+    <!-- Datos del transportista (si hay shipment) -->
+    {% if shipment %}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div class="bg-white rounded-xl border border-gray-200 p-5">
             <p class="text-xs text-gray-500 mb-1">{% trans "Transportista" %}</p>
-            <p class="font-semibold text-gray-900">{{ shipment.carrier.name|default:"Por asignar" }}</p>
-            {% if shipment.carrier.phone %}
-                <p class="text-sm text-gray-500 mt-1">📞 {{ shipment.carrier.phone }}</p>
+            {% if shipment.carrier %}
+                <p class="font-semibold text-gray-900">{{ shipment.carrier.name }}</p>
+                {% if shipment.carrier.phone %}
+                    <p class="text-sm text-gray-500 mt-1">📞 {{ shipment.carrier.phone }}</p>
+                {% endif %}
+            {% else %}
+                <p class="text-gray-400 text-sm">{% trans "Por asignar" %}</p>
             {% endif %}
         </div>
         <div class="bg-white rounded-xl border border-gray-200 p-5">
             <p class="text-xs text-gray-500 mb-1">{% trans "Número de seguimiento" %}</p>
             {% if shipment.tracking_number %}
                 <p class="font-mono font-semibold text-gray-900">{{ shipment.tracking_number }}</p>
+                {% if shipment.tracking_url %}
+                    <a href="{{ shipment.tracking_url }}" target="_blank" class="text-primary-600 hover:text-primary-700 text-sm font-medium mt-1 inline-block">
+                        {% trans "Ver en" %} {{ shipment.carrier.name }} ↗
+                    </a>
+                {% endif %}
             {% else %}
                 <p class="text-gray-400 text-sm">{% trans "Pendiente de asignación" %}</p>
             {% endif %}
         </div>
     </div>
 
+    {% if shipment.estimated_delivery %}
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 flex items-center gap-3">
+        <span class="text-xl">📅</span>
+        <p class="text-sm text-blue-700 font-medium">{% trans "Entrega estimada:" %} {{ shipment.estimated_delivery|date:"d/m/Y" }}</p>
+    </div>
+    {% endif %}
+    {% endif %}
+
     <!-- Dirección de entrega -->
     <div class="bg-white rounded-xl border border-gray-200 p-5 mb-6">
         <p class="text-xs text-gray-500 mb-1">{% trans "Dirección de entrega" %}</p>
-        <p class="font-medium text-gray-900">{{ shipment.order.first_name }} {{ shipment.order.last_name }}</p>
-        <p class="text-sm text-gray-600">{{ shipment.order.address }}, {{ shipment.order.city }}{% if shipment.order.region %}, {{ shipment.order.region }}{% endif %}</p>
+        <p class="font-medium text-gray-900">{{ order.first_name }} {{ order.last_name }}</p>
+        <p class="text-sm text-gray-600">{{ order.address }}, {{ order.city }}{% if order.region %}, {{ order.region }}{% endif %}</p>
+        {% if order.phone %}<p class="text-sm text-gray-500 mt-1">📞 {{ order.phone }}</p>{% endif %}
     </div>
 
-    <!-- Timeline de eventos -->
-    {% if events %}
+    <!-- Timeline de estados -->
     <div class="bg-white rounded-2xl border border-gray-200 p-6">
-        <h2 class="font-semibold text-gray-900 mb-6">{% trans "Historial del envío" %}</h2>
+        <h2 class="font-semibold text-gray-900 mb-6">{% trans "Estado del pedido" %}</h2>
 
         <div class="relative">
             <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
 
-            {% for event in events %}
-            <div class="relative flex gap-4 {% if not forloop.last %}mb-6{% endif %}">
-                <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 z-10
-                    {% if forloop.first %}bg-primary-600 text-white{% else %}bg-gray-100 text-gray-400{% endif %}">
-                    {% if event.status == 'preparing' %}📦
-                    {% elif event.status == 'picked_up' %}🚛
-                    {% elif event.status == 'in_transit' %}🚚
-                    {% elif event.status == 'out_for_delivery' %}🏍️
-                    {% elif event.status == 'delivered' %}✅
-                    {% elif event.status == 'failed' %}❌
-                    {% elif event.status == 'returned' %}↩️
-                    {% else %}📍{% endif %}
+            <!-- Pedido confirmado -->
+            <div class="relative flex gap-4 mb-6">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 z-10 bg-green-100">
+                    <span class="text-sm">✅</span>
                 </div>
-                <div class="flex-grow pb-2">
-                    <div class="flex items-center justify-between">
-                        <p class="font-medium text-gray-900 text-sm">{{ event.get_status_display }}</p>
-                        <span class="text-xs text-gray-400">{{ event.created_at|date:"d/m/Y H:i" }}</span>
-                    </div>
-                    <p class="text-sm text-gray-500 mt-1">{{ event.description }}</p>
-                    {% if event.location %}
-                        <p class="text-xs text-gray-400 mt-1">📍 {{ event.location }}</p>
+                <div>
+                    <p class="font-medium text-gray-900 text-sm">{% trans "Pedido confirmado" %}</p>
+                    <p class="text-xs text-gray-400">{{ order.created_at|date:"d/m/Y H:i" }}</p>
+                </div>
+            </div>
+
+            <!-- Pago -->
+            <div class="relative flex gap-4 mb-6">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 z-10 {% if order.payment_status == 'paid' %}bg-green-100{% else %}bg-yellow-100{% endif %}">
+                    <span class="text-sm">{% if order.payment_status == 'paid' %}✅{% else %}⏳{% endif %}</span>
+                </div>
+                <div>
+                    <p class="font-medium text-gray-900 text-sm">
+                        {% if order.payment_status == 'paid' %}{% trans "Pago recibido" %}
+                        {% elif order.payment_status == 'failed' %}{% trans "Pago fallido" %}
+                        {% else %}{% trans "Pago pendiente" %}{% endif %}
+                    </p>
+                    {% if order.payment_status == 'failed' %}
+                        <p class="text-xs text-red-500">{% trans "Intentá con otro método de pago" %}</p>
                     {% endif %}
                 </div>
             </div>
-            {% endfor %}
+
+            <!-- En preparación -->
+            <div class="relative flex gap-4 mb-6">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 z-10 {% if order.status == 'preparing' or order.status == 'shipped' or order.status == 'delivered' %}bg-green-100{% else %}bg-gray-100{% endif %}">
+                    <span class="text-sm">{% if order.status == 'preparing' or order.status == 'shipped' or order.status == 'delivered' %}✅{% else %}○{% endif %}</span>
+                </div>
+                <div>
+                    <p class="font-medium {% if order.status == 'preparing' or order.status == 'shipped' or order.status == 'delivered' %}text-gray-900{% else %}text-gray-400{% endif %} text-sm">{% trans "En preparación" %}</p>
+                    {% if order.status == 'preparing' %}
+                        <p class="text-xs text-primary-600">{% trans "Tu pedido se está preparando" %}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Enviado -->
+            <div class="relative flex gap-4 mb-6">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 z-10 {% if order.status == 'shipped' or order.status == 'delivered' %}bg-green-100{% else %}bg-gray-100{% endif %}">
+                    <span class="text-sm">{% if order.status == 'shipped' or order.status == 'delivered' %}✅{% elif order.status == 'preparing' %}⏳{% else %}○{% endif %}</span>
+                </div>
+                <div>
+                    <p class="font-medium {% if order.status == 'shipped' or order.status == 'delivered' %}text-gray-900{% else %}text-gray-400{% endif %} text-sm">{% trans "Enviado" %}</p>
+                    {% if order.status == 'shipped' and shipment %}
+                        {% if shipment.carrier %}
+                            <p class="text-xs text-blue-600">{{ shipment.carrier.name }}{% if shipment.tracking_number %} — {{ shipment.tracking_number }}{% endif %}</p>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Entregado -->
+            <div class="relative flex gap-4">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 z-10 {% if order.status == 'delivered' %}bg-green-100{% else %}bg-gray-100{% endif %}">
+                    <span class="text-sm">{% if order.status == 'delivered' %}✅{% else %}○{% endif %}</span>
+                </div>
+                <div>
+                    <p class="font-medium {% if order.status == 'delivered' %}text-gray-900{% else %}text-gray-400{% endif %} text-sm">{% trans "Entregado" %}</p>
+                    {% if order.status == 'delivered' %}
+                        <p class="text-xs text-green-600">{% trans "¡Tu pedido fue entregado!" %}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Eventos del transportista (vía webhook) -->
+            {% if events %}
+            <div class="mt-8 pt-6 border-t border-gray-200">
+                <p class="text-xs font-medium text-gray-500 mb-4">{% trans "Actualizaciones del transportista" %}</p>
+                {% for event in events %}
+                <div class="relative flex gap-4 {% if not forloop.last %}mb-4{% endif %}">
+                    <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 z-10 bg-gray-50">
+                        <span class="text-xs">
+                            {% if event.status == 'picked_up' %}🚛
+                            {% elif event.status == 'in_transit' %}🚚
+                            {% elif event.status == 'out_for_delivery' %}🏍️
+                            {% elif event.status == 'delivered' %}✅
+                            {% elif event.status == 'failed' %}❌
+                            {% elif event.status == 'returned' %}↩️
+                            {% else %}📍{% endif %}
+                        </span>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-700">{{ event.description }}</p>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span class="text-xs text-gray-400">{{ event.created_at|date:"d/m/Y H:i" }}</span>
+                            {% if event.location %}
+                                <span class="text-xs text-gray-400">📍 {{ event.location }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
         </div>
     </div>
-    {% else %}
-    <div class="bg-white rounded-2xl border border-gray-200 p-8 text-center">
-        <span class="text-4xl block mb-3">📦</span>
-        <p class="text-gray-500 text-sm">{% trans "Tu pedido está siendo preparado. El seguimiento se actualizará pronto." %}</p>
+
+    <div class="mt-6 text-center">
+        <a href="{% url 'orders:order_detail' order.pk %}" class="text-primary-600 hover:text-primary-700 text-sm font-medium">← {% trans "Volver al pedido" %}</a>
     </div>
-    {% endif %}
 </div>
 {% endblock %}
