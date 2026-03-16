@@ -4,7 +4,7 @@
         <div class="flex justify-between items-center h-16">
 
             <a href="{% url 'core:home' %}" class="flex items-center gap-2">
-                <span class="text-2xl">🔧</span>
+                <svg class="w-7 h-7 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.048.58.024 1.194-.14 1.743" /></svg>
                 <span class="text-xl font-bold text-primary-600">Ferrelon<span class="text-dark-800">Stock</span></span>
             </a>
 
@@ -34,7 +34,7 @@
                     <button @click="open = !open" @click.outside="open = false"
                         class="text-gray-700 hover:text-primary-600 font-medium transition flex items-center gap-1">
                         {% trans "Marcas" %}
-                        <svg class="w-4 h-4 transition" :class="open ? 'rotate-180' : '' " fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 transition" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
@@ -45,6 +45,10 @@
                         {% endfor %}
                     </div>
                 </div>
+
+                <!-- Ofertas -->
+                <a href="{% url 'shop:offers' %}" class="text-red-500 hover:text-red-600 font-semibold transition">{% trans "Ofertas" %}</a>
+
                 <a href="{% url 'core:about' %}" class="text-gray-700 hover:text-primary-600 font-medium transition">{% trans "Nosotros" %}</a>
                 <a href="{% url 'core:contact' %}" class="text-gray-700 hover:text-primary-600 font-medium transition">{% trans "Contacto" %}</a>
             </div>
@@ -88,6 +92,7 @@
                 {% for cat in categories_nav %}
                 <a href="{{ cat.get_absolute_url }}" class="text-gray-500 hover:text-primary-600 py-1 pl-4 text-sm">{{ cat.name }}</a>
                 {% endfor %}
+                <a href="{% url 'shop:offers' %}" class="text-red-500 hover:text-red-600 py-2 font-semibold">{% trans "Ofertas" %}</a>
                 <a href="{% url 'core:about' %}" class="text-gray-700 hover:text-primary-600 py-2 font-medium">{% trans "Nosotros" %}</a>
                 <a href="{% url 'core:contact' %}" class="text-gray-700 hover:text-primary-600 py-2 font-medium">{% trans "Contacto" %}</a>
                 {% if user.is_authenticated %}
@@ -116,7 +121,10 @@
         x-transition:leave-start="translate-x-0"
         x-transition:leave-end="translate-x-full">
         <div class="flex items-center justify-between p-4 border-b border-gray-200">
-            <h2 class="text-lg font-bold text-gray-900">🛒 {% trans "Carrito" %}</h2>
+            <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <svg class="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" /></svg>
+                {% trans "Carrito" %}
+            </h2>
             <button @click="cartOpen = false" class="p-2 text-gray-500 hover:text-gray-700 text-xl">&times;</button>
         </div>
         <div class="flex-grow overflow-y-auto p-4"

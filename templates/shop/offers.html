@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Ofertas" %}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <div class="text-center mb-10">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">{% trans "Ofertas" %}</h1>
+        <p class="text-gray-500">{% trans "Los mejores precios en herramientas y materiales" %}</p>
+    </div>
+
+    {% if products %}
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {% for product in products %}
+        <a href="{{ product.get_absolute_url }}" class="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition relative">
+            {% if product.discount_percent > 0 %}
+            <span class="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg z-10">-{{ product.discount_percent }}%</span>
+            {% endif %}
+            <div class="aspect-square bg-gray-100 flex items-center justify-center overflow-hidden">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                {% else %}
+                    <svg class="w-12 h-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.048.58.024 1.194-.14 1.743" /></svg>
+                {% endif %}
+            </div>
+            <div class="p-4">
+                {% if product.brand %}
+                <span class="text-xs text-gray-400 font-medium uppercase">{{ product.brand.name }}</span>
+                {% endif %}
+                <h3 class="font-semibold text-gray-900 mt-1 group-hover:text-primary-600 transition text-sm">{{ product.name }}</h3>
+                <div class="flex items-center gap-2 mt-2">
+                    <span class="text-lg font-bold text-primary-700">${{ product.discount_price|floatformat:0 }}</span>
+                    <span class="text-sm text-gray-400 line-through">${{ product.price|floatformat:0 }}</span>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-16">
+        <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" /><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" /></svg>
+        <h3 class="text-lg font-semibold text-gray-700 mb-2">{% trans "No hay ofertas activas" %}</h3>
+        <p class="text-gray-500 text-sm mb-6">{% trans "Volvé pronto, siempre tenemos nuevas promociones." %}</p>
+        <a href="{% url 'shop:product_list' %}" class="inline-block bg-primary-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-primary-700 transition text-sm">{% trans "Ver productos" %}</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

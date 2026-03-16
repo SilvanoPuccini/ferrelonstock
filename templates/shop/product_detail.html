@@ -6,104 +6,288 @@
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <nav class="flex mb-6 text-sm text-gray-500">
+    <!-- Breadcrumb -->
+    <nav class="flex mb-6 text-xs text-gray-400 uppercase tracking-wider">
         <a href="{% url 'core:home' %}" class="hover:text-primary-600">{% trans "Inicio" %}</a>
         <span class="mx-2">/</span>
         <a href="{% url 'shop:product_list' %}" class="hover:text-primary-600">{% trans "Productos" %}</a>
         <span class="mx-2">/</span>
         <a href="{% url 'shop:product_list_by_category' product.category.slug %}" class="hover:text-primary-600">{{ product.category.name }}</a>
         <span class="mx-2">/</span>
-        <span class="text-gray-900 font-medium">{{ product.name }}</span>
+        <span class="text-gray-700 font-medium">{{ product.name }}</span>
     </nav>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
 
-        <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden aspect-square flex items-center justify-center">
-            {% if product.image %}
-                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
-            {% else %}
-                <span class="text-8xl text-gray-300">🔧</span>
-            {% endif %}
-        </div>
-
-        <div>
-            <div class="flex items-center gap-3"><span class="text-sm text-primary-600 font-medium">{{ product.category.name }}</span>{% if product.brand %}<span class="text-sm text-gray-400">·</span><a href="{{ product.brand.get_absolute_url }}" class="text-sm text-gray-500 hover:text-primary-600 font-medium">{{ product.brand.name }}</a>{% endif %}</div>
-            <h1 class="text-3xl font-bold text-gray-900 mt-2">{{ product.name }}</h1>
-
-            <div class="flex items-center gap-4 mt-4">
-                <span class="text-3xl font-bold text-primary-700">${{ product.price|floatformat:0 }}</span>
-                {% if product.in_stock %}
-                    <span class="bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium">{% trans "En stock" %} ({{ product.stock }})</span>
+        <!-- Imagen principal + galería -->
+        <div x-data="{ mainImage: '{% if product.image %}{{ product.image.url }}{% endif %}' }">
+            <div class="relative bg-white rounded-2xl border border-gray-200 overflow-hidden aspect-square flex items-center justify-center">
+                {% if product.has_discount %}
+                <span class="absolute top-4 left-4 bg-red-500 text-white text-sm font-bold px-3 py-1.5 rounded-lg z-10">-{{ product.discount_percent }}%</span>
+                {% endif %}
+                {% if product.image %}
+                    <img :src="mainImage" alt="{{ product.name }}" class="w-full h-full object-contain bg-white">
                 {% else %}
-                    <span class="bg-red-50 text-red-700 px-3 py-1 rounded-full text-sm font-medium">{% trans "Sin stock" %}</span>
+                    <svg class="w-24 h-24 text-gray-200" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.048.58.024 1.194-.14 1.743" /></svg>
                 {% endif %}
             </div>
 
-            {% if product.description %}
-            <div class="mt-6">
-                <h3 class="font-semibold text-gray-900 mb-2">{% trans "Descripción" %}</h3>
-                <p class="text-gray-600 leading-relaxed text-sm">{{ product.description }}</p>
+            <!-- Mini galería -->
+            {% if product.image or gallery %}
+            <div class="flex gap-2 mt-3 overflow-x-auto pb-1">
+                {% if product.image %}
+                <button @click="mainImage = '{{ product.image.url }}'"
+                    class="w-16 h-16 rounded-lg border-2 overflow-hidden flex-shrink-0 transition"
+                    :class="mainImage === '{{ product.image.url }}' ? 'border-primary-600' : 'border-gray-200 hover:border-gray-300'">
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
+                </button>
+                {% endif %}
+                {% for img in gallery %}
+                <button @click="mainImage = '{{ img.image.url }}'"
+                    class="w-16 h-16 rounded-lg border-2 overflow-hidden flex-shrink-0 transition"
+                    :class="mainImage === '{{ img.image.url }}' ? 'border-primary-600' : 'border-gray-200 hover:border-gray-300'">
+                    <img src="{{ img.image.url }}" alt="{{ product.name }}" class="w-full h-full object-contain bg-white">
+                </button>
+                {% endfor %}
             </div>
             {% endif %}
+        </div>
 
+        <!-- Info del producto -->
+        <div>
+            <div class="flex items-center gap-2 text-sm">
+                <a href="{% url 'shop:product_list_by_category' product.category.slug %}" class="text-primary-600 font-semibold uppercase tracking-wider hover:text-primary-700">{{ product.category.name }}</a>
+                {% if product.brand %}
+                <span class="text-gray-300">·</span>
+                <a href="{{ product.brand.get_absolute_url }}" class="text-gray-500 hover:text-primary-600 font-medium">{{ product.brand.name }}</a>
+                {% endif %}
+            </div>
+
+            <h1 class="text-3xl font-bold text-gray-900 mt-2">{{ product.name }}</h1>
+
+            <div class="flex items-center gap-3 mt-2">
+                <span class="text-xs text-gray-400 font-mono">SKU: FS-{{ product.pk|stringformat:"05d" }}</span>
+                {% if product.in_stock %}
+                    <span class="flex items-center gap-1 text-green-600 text-sm font-medium">
+                        <span class="w-2 h-2 rounded-full bg-green-500"></span> {% trans "En stock" %} ({{ product.stock }})
+                    </span>
+                {% else %}
+                    <span class="flex items-center gap-1 text-red-600 text-sm font-medium">
+                        <span class="w-2 h-2 rounded-full bg-red-500"></span> {% trans "Sin stock" %}
+                    </span>
+                {% endif %}
+            </div>
+
+            <!-- Precio -->
+            <div class="mt-6 bg-gray-50 rounded-xl p-5">
+                {% if product.has_discount %}
+                <div class="flex items-center gap-3">
+                    <span class="text-3xl font-bold text-primary-700">${{ product.discount_price|floatformat:0 }}</span>
+                    <span class="text-lg text-gray-400 line-through">${{ product.price|floatformat:0 }}</span>
+                    <span class="bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-lg">-{{ product.discount_percent }}% OFF</span>
+                </div>
+                {% else %}
+                <span class="text-3xl font-bold text-primary-700">${{ product.price|floatformat:0 }}</span>
+                {% endif %}
+            </div>
+
+            <!-- Agregar al carrito -->
             {% if product.in_stock %}
-            <div class="mt-8" x-data="{ qty: 1 }">
+            <div class="mt-6" x-data="{ qty: 1 }">
                 <form method="POST" action="{% url 'cart:cart_add' product.id %}"
                     hx-post="{% url 'cart:cart_add' product.id %}"
-                    
-                    
                     hx-swap="none" @htmx:after-request="cartOpen = true">
-
                     {% csrf_token %}
                     <input type="hidden" name="quantity" :value="qty">
-
-                    <div class="flex items-center gap-4">
-                        <div class="flex items-center border border-gray-300 rounded-lg">
-                            <button type="button" @click="qty = Math.max(1, qty - 1)" class="px-4 py-3 text-gray-600 hover:bg-gray-50 transition text-lg">−</button>
-                            <span class="px-4 py-3 font-medium text-sm min-w-[40px] text-center" x-text="qty"></span>
-                            <button type="button" @click="qty = Math.min({{ product.stock }}, qty + 1)" class="px-4 py-3 text-gray-600 hover:bg-gray-50 transition text-lg">+</button>
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center border border-gray-300 rounded-xl bg-white">
+                            <button type="button" @click="qty = Math.max(1, qty - 1)" class="px-4 py-3.5 text-gray-600 hover:bg-gray-50 transition text-lg rounded-l-xl">−</button>
+                            <span class="px-5 py-3.5 font-semibold text-sm min-w-[50px] text-center border-x border-gray-300" x-text="qty"></span>
+                            <button type="button" @click="qty = Math.min({{ product.stock }}, qty + 1)" class="px-4 py-3.5 text-gray-600 hover:bg-gray-50 transition text-lg rounded-r-xl">+</button>
                         </div>
-                        <button type="submit" class="flex-grow bg-primary-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary-700 transition text-sm">
-                            🛒 {% trans "Agregar al carrito" %}
+                        <button type="submit" class="flex-grow flex items-center justify-center gap-2 bg-primary-600 text-white py-3.5 px-6 rounded-xl font-semibold hover:bg-primary-700 transition text-sm">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" /></svg>
+                            {% trans "Agregar al carrito" %}
                         </button>
                     </div>
                 </form>
             </div>
             {% endif %}
 
-            <div class="mt-8 border-t border-gray-200 pt-6 space-y-3 text-sm">
-                <div class="flex justify-between">
-                    <span class="text-gray-500">{% trans "Categoría" %}</span>
-                    <a href="{% url 'shop:product_list_by_category' product.category.slug %}" class="text-primary-600 font-medium hover:text-primary-700">{{ product.category.name }}</a>
+            <!-- Info de envío y retiro -->
+            <div class="mt-6 space-y-3">
+                <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-xl">
+                    <div class="w-9 h-9 flex items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" /></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-blue-800">{% trans "Envío a todo el país" %}</p>
+                        <p class="text-xs text-blue-600">{% trans "Llega entre 24 y 48 horas hábiles" %}</p>
+                    </div>
                 </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-500">{% trans "Disponibilidad" %}</span>
-                    <span class="font-medium">{% if product.in_stock %}{% trans "Disponible" %}{% else %}{% trans "No disponible" %}{% endif %}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-500">{% trans "Código" %}</span>
-                    <span class="font-mono text-gray-700">FS-{{ product.pk|stringformat:"05d" }}</span>
+                <div class="flex items-center gap-3 p-3 bg-green-50 rounded-xl">
+                    <div class="w-9 h-9 flex items-center justify-center rounded-lg bg-green-100 text-green-600">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.15c0 .415.336.75.75.75z" /></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-green-800">{% trans "Retiro en sucursal" %}</p>
+                        <p class="text-xs text-green-600">{% trans "Disponible en Av. Corrientes 1234, CABA" %}</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Tabs de detalles -->
+    <div class="mt-12" x-data="{ tab: 'description' }">
+        <div class="flex gap-1 border-b border-gray-200 mb-6 overflow-x-auto">
+            <button @click="tab = 'description'"
+                :class="tab === 'description' ? 'border-primary-600 text-primary-600 bg-primary-50' : 'border-transparent text-gray-500 hover:text-gray-700'"
+                class="px-5 py-3 text-sm font-semibold border-b-2 transition rounded-t-lg whitespace-nowrap">
+                {% trans "Descripción del Producto" %}
+            </button>
+            <button @click="tab = 'specs'"
+                :class="tab === 'specs' ? 'border-primary-600 text-primary-600 bg-primary-50' : 'border-transparent text-gray-500 hover:text-gray-700'"
+                class="px-5 py-3 text-sm font-semibold border-b-2 transition rounded-t-lg whitespace-nowrap">
+                {% trans "Especificaciones Técnicas" %}
+            </button>
+            <button @click="tab = 'shipping'"
+                :class="tab === 'shipping' ? 'border-primary-600 text-primary-600 bg-primary-50' : 'border-transparent text-gray-500 hover:text-gray-700'"
+                class="px-5 py-3 text-sm font-semibold border-b-2 transition rounded-t-lg whitespace-nowrap">
+                {% trans "Cambios y Devoluciones" %}
+            </button>
+            <button @click="tab = 'despacho'"
+                :class="tab === 'despacho' ? 'border-primary-600 text-primary-600 bg-primary-50' : 'border-transparent text-gray-500 hover:text-gray-700'"
+                class="px-5 py-3 text-sm font-semibold border-b-2 transition rounded-t-lg whitespace-nowrap">
+                {% trans "Condiciones de Despacho" %}
+            </button>
+        </div>
+
+        <!-- Tab: Descripción -->
+        <div x-show="tab === 'description'" class="bg-white rounded-xl border border-gray-200 p-6">
+            {% if product.description %}
+            <p class="text-gray-600 leading-relaxed text-sm">{{ product.description }}</p>
+            {% else %}
+            <p class="text-gray-400 text-sm">{% trans "Sin descripción disponible." %}</p>
+            {% endif %}
+        </div>
+
+        <!-- Tab: Especificaciones -->
+        <div x-show="tab === 'specs'" x-cloak class="bg-white rounded-xl border border-gray-200 p-6">
+            <table class="w-full text-sm">
+                <tbody>
+                    <tr class="border-b border-gray-100">
+                        <td class="py-3 text-gray-500 w-1/4">{% trans "Marca" %}</td>
+                        <td class="py-3 font-medium text-gray-900 w-1/4">{{ product.brand.name|default:"—" }}</td>
+                        <td class="py-3 text-gray-500 w-1/4">{% trans "Categoría" %}</td>
+                        <td class="py-3 font-medium text-gray-900 w-1/4">{{ product.category.name }}</td>
+                    </tr>
+                    <tr class="border-b border-gray-100">
+                        <td class="py-3 text-gray-500">{% trans "Código" %}</td>
+                        <td class="py-3 font-mono text-gray-700">FS-{{ product.pk|stringformat:"05d" }}</td>
+                        <td class="py-3 text-gray-500">{% trans "Stock" %}</td>
+                        <td class="py-3 font-medium text-gray-900">{{ product.stock }} {% trans "unidades" %}</td>
+                    </tr>
+                    <tr>
+                        <td class="py-3 text-gray-500">{% trans "Disponibilidad" %}</td>
+                        <td class="py-3 font-medium {% if product.in_stock %}text-green-600{% else %}text-red-600{% endif %}">
+                            {% if product.in_stock %}{% trans "Disponible" %}{% else %}{% trans "No disponible" %}{% endif %}
+                        </td>
+                        <td class="py-3 text-gray-500">{% trans "Garantía" %}</td>
+                        <td class="py-3 font-medium text-gray-900">{% trans "Según fabricante" %}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Tab: Cambios y Devoluciones -->
+        <div x-show="tab === 'shipping'" x-cloak class="bg-white rounded-xl border border-gray-200 p-6">
+            <div class="space-y-4 text-sm text-gray-600">
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" /></svg>
+                    <div>
+                        <p class="font-semibold text-gray-900">{% trans "Derecho de arrepentimiento" %}</p>
+                        <p>{% trans "Tenés 10 días corridos desde la recepción del producto para solicitar la devolución, según la Ley 24.240 de Defensa del Consumidor (Argentina)." %}</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" /></svg>
+                    <div>
+                        <p class="font-semibold text-gray-900">{% trans "Cambios" %}</p>
+                        <p>{% trans "Podés cambiar tu producto dentro de los 30 días si se encuentra en su estado original, sin uso y con el embalaje completo." %}</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
+                    <div>
+                        <p class="font-semibold text-gray-900">{% trans "Garantía" %}</p>
+                        <p>{% trans "Todos nuestros productos cuentan con la garantía del fabricante. En caso de defecto, contactanos para gestionar el reclamo." %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Condiciones de Despacho -->
+        <div x-show="tab === 'despacho'" x-cloak class="bg-white rounded-xl border border-gray-200 p-6">
+            <div class="space-y-4 text-sm text-gray-600">
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" /></svg>
+                    <div>
+                        <p class="font-semibold text-gray-900">{% trans "Envío estándar" %}</p>
+                        <p>{% trans "Entrega entre 24 y 48 horas hábiles en CABA y GBA. 3 a 7 días hábiles para el interior del país. Costo según zona y peso." %}</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>
+                    <div>
+                        <p class="font-semibold text-gray-900">{% trans "Envío express" %}</p>
+                        <p>{% trans "Entrega en el mismo día para pedidos realizados antes de las 12:00 hs en CABA y GBA." %}</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.15c0 .415.336.75.75.75z" /></svg>
+                    <div>
+                        <p class="font-semibold text-gray-900">{% trans "Retiro en sucursal" %}</p>
+                        <p>{% trans "Sin costo. Av. Corrientes 1234, CABA. Lunes a viernes de 8:00 a 18:00, sábados de 9:00 a 14:00." %}</p>
+                    </div>
+                </div>
+                <div class="bg-primary-50 rounded-xl p-4 mt-2 flex items-center gap-3">
+                    <svg class="w-5 h-5 text-primary-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" /><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" /></svg>
+                    <p class="text-sm text-primary-700 font-medium">{% trans "Envío gratis en compras mayores a $50.000" %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Productos relacionados -->
     {% if related_products %}
-    <section class="mt-16">
-        <h2 class="text-xl font-bold text-gray-900 mb-6">{% trans "Productos relacionados" %}</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {% for product in related_products %}
-            <a href="{{ product.get_absolute_url }}" class="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition">
-                <div class="aspect-square bg-gray-100 flex items-center justify-center overflow-hidden">
-                    {% if product.image %}
-                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+    <section class="mt-12">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold text-gray-900">{% trans "Podría interesarte" %}</h2>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+            {% for item in related_products %}
+            <a href="{{ item.get_absolute_url }}" class="group bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition relative">
+                {% if item.has_discount %}
+                <span class="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg z-10">-{{ item.discount_percent }}%</span>
+                {% endif %}
+                <div class="aspect-square bg-gray-50 flex items-center justify-center overflow-hidden">
+                    {% if item.image %}
+                        <img src="{{ item.image.url }}" alt="{{ item.name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
                     {% else %}
-                        <span class="text-5xl text-gray-300">🔧</span>
+                        <svg class="w-12 h-12 text-gray-200" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.048.58.024 1.194-.14 1.743" /></svg>
                     {% endif %}
                 </div>
                 <div class="p-4">
-                    <h3 class="font-semibold text-sm text-gray-900 group-hover:text-primary-600 transition">{{ product.name }}</h3>
-                    <span class="text-lg font-bold text-primary-700 mt-1 block">${{ product.price|floatformat:0 }}</span>
+                    <h3 class="font-semibold text-sm text-gray-900 group-hover:text-primary-600 transition">{{ item.name }}</h3>
+                    {% if item.has_discount %}
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="text-lg font-bold text-primary-700">${{ item.discount_price|floatformat:0 }}</span>
+                        <span class="text-sm text-gray-400 line-through">${{ item.price|floatformat:0 }}</span>
+                    </div>
+                    {% else %}
+                    <span class="text-lg font-bold text-primary-700 mt-1 block">${{ item.price|floatformat:0 }}</span>
+                    {% endif %}
                 </div>
             </a>
             {% endfor %}

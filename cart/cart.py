@@ -16,14 +16,17 @@ class Cart:
         if product_id not in self.cart:
             self.cart[product_id] = {
                 'quantity': 0,
-                'price': str(product.price)
+                'price': str(product.final_price)
             }
+        else:
+            # Actualizar precio por si cambió la oferta
+            self.cart[product_id]['price'] = str(product.final_price)
+
         if override_quantity:
             self.cart[product_id]['quantity'] = quantity
         else:
             self.cart[product_id]['quantity'] += quantity
 
-        # No superar el stock disponible
         if self.cart[product_id]['quantity'] > product.stock:
             self.cart[product_id]['quantity'] = product.stock
 
@@ -44,7 +47,10 @@ class Cart:
         cart = self.cart.copy()
 
         for product in products:
-            cart[str(product.id)]['product'] = product
+            pid = str(product.id)
+            cart[pid]['product'] = product
+            # Siempre usar precio actual (por si cambió la oferta)
+            cart[pid]['price'] = str(product.final_price)
 
         for item in cart.values():
             item['price'] = Decimal(item['price'])
@@ -55,10 +61,15 @@ class Cart:
         return sum(item['quantity'] for item in self.cart.values())
 
     def get_total_price(self):
-        return sum(
-            Decimal(item['price']) * item['quantity']
-            for item in self.cart.values()
-        )
+        product_ids = self.cart.keys()
+        products = {str(p.id): p for p in Product.objects.filter(id__in=product_ids)}
+        total = Decimal('0')
+        for pid, item in self.cart.items():
+            if pid in products:
+                total += products[pid].final_price * item['quantity']
+            else:
+                total += Decimal(item['price']) * item['quantity']
+        return total
 
     def get_total_items(self):
         return sum(item['quantity'] for item in self.cart.values())
