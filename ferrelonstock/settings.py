@@ -143,3 +143,6 @@ STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY')
 # Mercado Pago
 MP_PUBLIC_KEY = env('MP_PUBLIC_KEY')
 MP_ACCESS_TOKEN = env('MP_ACCESS_TOKEN')
+
+# Shipping webhook
+SHIPPING_WEBHOOK_SECRET = env('SHIPPING_WEBHOOK_SECRET', default='change-me')
