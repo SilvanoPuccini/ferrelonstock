@@ -8,3 +8,10 @@ media/
 .coverage
 htmlcov/
 staticfiles/
+.env
+*.pyc
+__pycache__/
+media/
+staticfiles/
+db.sqlite3
+*.log
