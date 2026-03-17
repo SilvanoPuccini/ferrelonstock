@@ -16,7 +16,7 @@ else:
     print('Superusuario ya existe')
 "
 
-# Cargar datos demo si no hay productos
+# Cargar datos demo + imágenes si no hay productos
 python manage.py shell -c "
 from shop.models import Product
 if Product.objects.count() == 0:
@@ -28,4 +28,13 @@ if Product.objects.count() == 0:
     print('Datos demo cargados')
 else:
     print(f'Ya hay {Product.objects.count()} productos')
+
+# Cargar imágenes si hay productos sin imagen
+products_sin_imagen = Product.objects.filter(image='')
+if products_sin_imagen.exists():
+    import subprocess
+    subprocess.call(['python', 'manage.py', 'load_product_images'])
+    print('Imágenes cargadas')
+else:
+    print('Productos ya tienen imágenes')
 "
