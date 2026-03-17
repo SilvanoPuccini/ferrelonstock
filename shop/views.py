@@ -46,6 +46,10 @@ class ProductListView(ListView):
         context['search_query'] = self.request.GET.get('q', '')
         return context
 
+    def get_template_names(self):
+        if self.request.headers.get('HX-Request'):
+            return ['shop/_product_grid.html']
+        return ['shop/product_list.html']
 
 class ProductDetailView(DetailView):
     model = Product
