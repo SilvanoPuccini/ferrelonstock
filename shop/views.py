@@ -42,7 +42,11 @@ class ProductListView(ListView):
         context['current_brand'] = self.kwargs.get('brand_slug', '')
         context['search_query'] = self.request.GET.get('q', '')
         return context
-
+	
+    def get_template_names(self):
+        if self.request.headers.get('HX-Request'):
+            return ['shop/_product_grid.html']
+        return [self.template_name]
 
 class ProductDetailView(DetailView):
     model = Product

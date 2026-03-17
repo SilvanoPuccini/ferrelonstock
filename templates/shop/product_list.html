@@ -23,58 +23,75 @@
 
     <div class="flex flex-col lg:flex-row gap-8">
 
-        <aside class="w-full lg:w-64 flex-shrink-0 space-y-6">
+        <!-- Sidebar sticky -->
+        <aside class="w-full lg:w-64 flex-shrink-0">
+            <div class="lg:sticky lg:top-20 space-y-4 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto" style="scrollbar-width: thin;">
 
-            <!-- Buscador -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">{% trans "Buscar" %}</label>
-                <input type="search" name="q" value="{{ search_query }}"
-                    placeholder="{% trans 'Producto o marca...' %}"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
-                    hx-get="{% url 'shop:product_list' %}"
-                    hx-trigger="keyup changed delay:300ms"
-                    hx-target="#product-grid"
-                    hx-swap="innerHTML"
-                    hx-include="this">
-            </div>
+                <!-- Buscador -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{% trans "Buscar" %}</label>
+                    <div class="relative">
+                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+                        <input type="search" name="q" value="{{ search_query }}"
+                            placeholder="{% trans 'Producto o marca...' %}"
+                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
+                            hx-get="{% url 'shop:product_list' %}"
+                            hx-trigger="keyup changed delay:300ms"
+                            hx-target="#product-grid"
+                            hx-swap="innerHTML"
+                            hx-include="this">
+                    </div>
+                </div>
 
-            <!-- Categorías -->
-            <div class="bg-white rounded-xl border border-gray-200 p-4">
-                <h3 class="font-semibold text-gray-900 mb-3">{% trans "Categorías" %}</h3>
-                <ul class="space-y-1">
-                    <li>
-                        <a href="{% url 'shop:product_list' %}"
-                            class="block py-2 px-3 rounded-lg text-sm transition
-                            {% if not current_category and not current_brand %}bg-primary-50 text-primary-700 font-medium{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
-                            {% trans "Todas" %}
-                        </a>
-                    </li>
-                    {% for cat in categories %}
-                    <li>
-                        <a href="{% url 'shop:product_list_by_category' cat.slug %}"
-                            class="block py-2 px-3 rounded-lg text-sm transition
-                            {% if current_category.slug == cat.slug %}bg-primary-50 text-primary-700 font-medium{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
-                            {{ cat.name }}
-                        </a>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
+                <!-- Categorías colapsable independiente -->
+                <div class="bg-white rounded-xl border border-gray-200 p-4" x-data="{ catOpen: {% if current_category %}true{% else %}false{% endif %} }">
+                    <button @click="catOpen = !catOpen" class="w-full flex items-center justify-between">
+                        <h3 class="font-semibold text-gray-900">{% trans "Categorías" %}</h3>
+                        <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="catOpen ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                    </button>
+                    <div x-show="catOpen" x-collapse class="mt-3 max-h-96 overflow-y-auto" style="scrollbar-width: thin;">
+                        <ul class="space-y-1">
+                            <li>
+                                <a href="{% url 'shop:product_list' %}"
+                                    class="block py-2 px-3 rounded-lg text-sm transition
+                                    {% if not current_category and not current_brand %}bg-primary-50 text-primary-700 font-medium{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
+                                    {% trans "Todas" %}
+                                </a>
+                            </li>
+                            {% for cat in categories %}
+                            <li>
+                                <a href="{% url 'shop:product_list_by_category' cat.slug %}"
+                                    class="block py-2 px-3 rounded-lg text-sm transition
+                                    {% if current_category == cat.slug %}bg-primary-50 text-primary-700 font-medium{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
+                                    {{ cat.name }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
 
-            <!-- Marcas -->
-            <div class="bg-white rounded-xl border border-gray-200 p-4">
-                <h3 class="font-semibold text-gray-900 mb-3">{% trans "Marcas" %}</h3>
-                <ul class="space-y-1">
-                    {% for brand in brands %}
-                    <li>
-                        <a href="{% url 'shop:product_list_by_brand' brand.slug %}"
-                            class="block py-2 px-3 rounded-lg text-sm transition
-                            {% if current_brand.slug == brand.slug %}bg-primary-50 text-primary-700 font-medium{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
-                            {{ brand.name }}
-                        </a>
-                    </li>
-                    {% endfor %}
-                </ul>
+                <!-- Marcas colapsable independiente -->
+                <div class="bg-white rounded-xl border border-gray-200 p-4" x-data="{ brandOpen: {% if current_brand %}true{% else %}false{% endif %} }">
+                    <button @click="brandOpen = !brandOpen" class="w-full flex items-center justify-between">
+                        <h3 class="font-semibold text-gray-900">{% trans "Marcas" %}</h3>
+                        <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="brandOpen ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                    </button>
+                    <div x-show="brandOpen" x-collapse class="mt-3 max-h-96 overflow-y-auto" style="scrollbar-width: thin;">
+                        <ul class="space-y-1">
+                            {% for brand in brands %}
+                            <li>
+                                <a href="{% url 'shop:product_list_by_brand' brand.slug %}"
+                                    class="block py-2 px-3 rounded-lg text-sm transition
+                                    {% if current_brand == brand.slug %}bg-primary-50 text-primary-700 font-medium{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
+                                    {{ brand.name }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
             </div>
         </aside>
 

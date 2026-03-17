@@ -9,13 +9,14 @@
             </a>
 
             <div class="hidden md:flex items-center gap-6">
-                <a href="{% url 'core:home' %}" class="text-gray-700 hover:text-primary-600 font-medium transition">{% trans "Inicio" %}</a>
-                <a href="{% url 'shop:product_list' %}" class="text-gray-700 hover:text-primary-600 font-medium transition">{% trans "Productos" %}</a>
+                <a href="{% url 'core:home' %}" class="font-medium transition border-b-2 pb-0.5 {% if request.path == '/' %}border-primary-600 text-primary-600{% else %}border-transparent text-gray-700 hover:text-primary-600{% endif %}">{% trans "Inicio" %}</a>
+
+                <a href="{% url 'shop:product_list' %}" class="font-medium transition border-b-2 pb-0.5 {% if '/shop/' in request.path and '/offers/' not in request.path %}border-primary-600 text-primary-600{% else %}border-transparent text-gray-700 hover:text-primary-600{% endif %}">{% trans "Productos" %}</a>
 
                 <!-- Categorías dropdown -->
                 <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open" @click.outside="open = false"
-                        class="text-gray-700 hover:text-primary-600 font-medium transition flex items-center gap-1">
+                        class="font-medium transition flex items-center gap-1 border-b-2 pb-0.5 {% if '/category/' in request.path %}border-primary-600 text-primary-600{% else %}border-transparent text-gray-700 hover:text-primary-600{% endif %}">
                         {% trans "Categorías" %}
                         <svg class="w-4 h-4 transition" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -32,7 +33,7 @@
                 <!-- Marcas dropdown -->
                 <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open" @click.outside="open = false"
-                        class="text-gray-700 hover:text-primary-600 font-medium transition flex items-center gap-1">
+                        class="font-medium transition flex items-center gap-1 border-b-2 pb-0.5 {% if '/brand/' in request.path %}border-primary-600 text-primary-600{% else %}border-transparent text-gray-700 hover:text-primary-600{% endif %}">
                         {% trans "Marcas" %}
                         <svg class="w-4 h-4 transition" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -47,10 +48,11 @@
                 </div>
 
                 <!-- Ofertas -->
-                <a href="{% url 'shop:offers' %}" class="text-red-500 hover:text-red-600 font-semibold transition">{% trans "Ofertas" %}</a>
+                <a href="{% url 'shop:offers' %}" class="font-semibold transition border-b-2 pb-0.5 {% if '/offers/' in request.path %}border-red-500 text-red-600{% else %}border-transparent text-red-500 hover:text-red-600{% endif %}">{% trans "Ofertas" %}</a>
 
-                <a href="{% url 'core:about' %}" class="text-gray-700 hover:text-primary-600 font-medium transition">{% trans "Nosotros" %}</a>
-                <a href="{% url 'core:contact' %}" class="text-gray-700 hover:text-primary-600 font-medium transition">{% trans "Contacto" %}</a>
+                <a href="{% url 'core:about' %}" class="font-medium transition border-b-2 pb-0.5 {% if '/about/' in request.path %}border-primary-600 text-primary-600{% else %}border-transparent text-gray-700 hover:text-primary-600{% endif %}">{% trans "Nosotros" %}</a>
+
+                <a href="{% url 'core:contact' %}" class="font-medium transition border-b-2 pb-0.5 {% if '/contact/' in request.path %}border-primary-600 text-primary-600{% else %}border-transparent text-gray-700 hover:text-primary-600{% endif %}">{% trans "Contacto" %}</a>
             </div>
 
             <div class="flex items-center gap-4">
@@ -87,14 +89,14 @@
         <!-- Mobile menu -->
         <div class="hidden md:hidden pb-4" id="mobile-menu">
             <div class="flex flex-col gap-2 pt-2 border-t border-gray-100">
-                <a href="{% url 'core:home' %}" class="text-gray-700 hover:text-primary-600 py-2 font-medium">{% trans "Inicio" %}</a>
-                <a href="{% url 'shop:product_list' %}" class="text-gray-700 hover:text-primary-600 py-2 font-medium">{% trans "Productos" %}</a>
+                <a href="{% url 'core:home' %}" class="py-2 font-medium {% if request.path == '/' %}text-primary-600{% else %}text-gray-700 hover:text-primary-600{% endif %}">{% trans "Inicio" %}</a>
+                <a href="{% url 'shop:product_list' %}" class="py-2 font-medium {% if '/shop/' in request.path %}text-primary-600{% else %}text-gray-700 hover:text-primary-600{% endif %}">{% trans "Productos" %}</a>
                 {% for cat in categories_nav %}
-                <a href="{{ cat.get_absolute_url }}" class="text-gray-500 hover:text-primary-600 py-1 pl-4 text-sm">{{ cat.name }}</a>
+                <a href="{{ cat.get_absolute_url }}" class="py-1 pl-4 text-sm text-gray-500 hover:text-primary-600">{{ cat.name }}</a>
                 {% endfor %}
-                <a href="{% url 'shop:offers' %}" class="text-red-500 hover:text-red-600 py-2 font-semibold">{% trans "Ofertas" %}</a>
-                <a href="{% url 'core:about' %}" class="text-gray-700 hover:text-primary-600 py-2 font-medium">{% trans "Nosotros" %}</a>
-                <a href="{% url 'core:contact' %}" class="text-gray-700 hover:text-primary-600 py-2 font-medium">{% trans "Contacto" %}</a>
+                <a href="{% url 'shop:offers' %}" class="py-2 font-semibold {% if '/offers/' in request.path %}text-red-600{% else %}text-red-500 hover:text-red-600{% endif %}">{% trans "Ofertas" %}</a>
+                <a href="{% url 'core:about' %}" class="py-2 font-medium {% if '/about/' in request.path %}text-primary-600{% else %}text-gray-700 hover:text-primary-600{% endif %}">{% trans "Nosotros" %}</a>
+                <a href="{% url 'core:contact' %}" class="py-2 font-medium {% if '/contact/' in request.path %}text-primary-600{% else %}text-gray-700 hover:text-primary-600{% endif %}">{% trans "Contacto" %}</a>
                 {% if user.is_authenticated %}
                     <a href="{% url 'orders:order_history' %}" class="text-gray-700 hover:text-primary-600 py-2 font-medium">{% trans "Mis pedidos" %}</a>
                     <a href="{% url 'account_logout' %}" class="text-red-600 hover:text-red-700 py-2 font-medium">{% trans "Salir" %}</a>
