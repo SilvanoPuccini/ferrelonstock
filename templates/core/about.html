@@ -5,153 +5,142 @@
 
 {% block content %}
 <!-- Hero -->
-<section class="bg-gradient-to-r from-dark-800 to-dark-900 text-white py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h1 class="text-4xl font-bold mb-4">{% trans "Sobre Nosotros" %}</h1>
-        <p class="text-lg text-gray-300 max-w-2xl mx-auto">{% trans "Más de una ferretería. Somos tu socio en cada proyecto de construcción." %}</p>
+<section class="relative bg-dark-900 text-white overflow-hidden">
+    <img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1600&h=500&fit=crop" alt="" class="absolute inset-0 w-full h-full object-cover opacity-30">
+    <div class="absolute inset-0 bg-gradient-to-r from-dark-900/90 to-dark-900/50"></div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+        <span class="inline-block bg-primary-600 text-white text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4">{% trans "Nuestra esencia" %}</span>
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">{% trans "Construyendo el Futuro del" %}<br><span class="text-primary-400">{% trans "Suministro Profesional" %}</span></h1>
+        <p class="text-lg text-gray-300 max-w-2xl mx-auto">{% trans "FerrelonStock: Tu aliado estratégico en el corralón y la ferretería. Calidad que soporta tus proyectos más ambiciosos." %}</p>
     </div>
 </section>
 
-<!-- Historia -->
-<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+<!-- Stats -->
+<section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-10">
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-lg p-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <div>
+                <span class="text-3xl font-bold text-primary-600 block">25+</span>
+                <span class="text-xs text-gray-500 uppercase tracking-wider font-medium">{% trans "Años de historia" %}</span>
+            </div>
+            <div>
+                <span class="text-3xl font-bold text-primary-600 block">15k+</span>
+                <span class="text-xs text-gray-500 uppercase tracking-wider font-medium">{% trans "Pedidos enviados" %}</span>
+            </div>
+            <div>
+                <span class="text-3xl font-bold text-primary-600 block">500+</span>
+                <span class="text-xs text-gray-500 uppercase tracking-wider font-medium">{% trans "Obras activas" %}</span>
+            </div>
+            <div>
+                <span class="text-3xl font-bold text-primary-600 block">ISO 9001</span>
+                <span class="text-xs text-gray-500 uppercase tracking-wider font-medium">{% trans "Certificación" %}</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Trayectoria -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         <div>
-            <h2 class="text-2xl font-bold text-gray-900 mb-4">{% trans "Nuestra historia" %}</h2>
-            <p class="text-gray-600 leading-relaxed mb-4">{% trans "FerrelonStock nació con la misión de modernizar la forma en que comprás materiales de construcción y herramientas. Sabemos lo difícil que es recorrer ferreterías buscando lo que necesitás, por eso creamos una plataforma donde encontrás todo en un solo lugar." %}</p>
-            <p class="text-gray-600 leading-relaxed">{% trans "Desde Buenos Aires, despachamos a todo el país con el compromiso de ofrecer los mejores precios, marcas de calidad y un servicio al cliente que marca la diferencia." %}</p>
+            <span class="text-xs font-bold text-primary-600 uppercase tracking-widest">{% trans "Trayectoria & Compromiso" %}</span>
+            <h2 class="text-3xl font-bold text-gray-900 mt-2 mb-6">{% trans "Liderando la industria del suministro por más de un cuarto de siglo." %}</h2>
+            <p class="text-gray-600 leading-relaxed mb-4">{% trans "Desde 1998, FerrelonStock ha evolucionado de un almacén local a ser el referente indiscutido en logística integral para la construcción. Nuestra historia está cimentada sobre la base de la eficiencia operativa y el conocimiento técnico profundo de cada material que comercializamos." %}</p>
+            <p class="text-gray-600 leading-relaxed mb-4">{% trans "Nos especializamos en el suministro a gran escala para proyectos de infraestructura, desarrollos inmobiliarios y complejos industriales. Contamos con una flota propia y centros de distribución automatizados que nos permiten garantizar una cadena de suministro ininterrumpida." %}</p>
+            <div class="bg-gray-50 border-l-4 border-primary-600 rounded-r-lg p-4 mb-6">
+                <p class="text-gray-700 text-sm italic">{% trans "\"Nuestra misión es simple: que tu obra nunca se detenga. Si el proyecto es grande, nuestro respaldo es proporcionalmente sólido.\"" %}</p>
+            </div>
+            <a href="#equipo" class="inline-flex items-center gap-2 bg-dark-900 text-white font-semibold px-6 py-3 rounded-lg hover:bg-dark-800 transition text-sm">
+                {% trans "Conocé nuestro equipo" %}
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" /></svg>
+            </a>
         </div>
         <div class="relative rounded-2xl overflow-hidden shadow-lg">
-            <img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&h=600&fit=crop" alt="Construcción" class="w-full h-80 object-cover">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-            <div class="absolute bottom-0 left-0 right-0 p-6">
-                <p class="text-white font-semibold text-lg">{% trans "Construyendo confianza, un proyecto a la vez." %}</p>
-            </div>
+            <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&h=600&fit=crop" alt="Depósito" class="w-full h-80 lg:h-96 object-cover">
         </div>
     </div>
 </section>
 
 <!-- Valores -->
-<section class="bg-gray-50 py-16">
+<section class="bg-gray-50 py-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-2xl font-bold text-center text-gray-900 mb-10">{% trans "Nuestros valores" %}</h2>
+        <div class="text-center mb-12">
+            <span class="text-xs font-bold text-primary-600 uppercase tracking-widest">{% trans "Lo que nos define" %}</span>
+            <h2 class="text-3xl font-bold text-gray-900 mt-2">{% trans "Valores que cimentan confianza" %}</h2>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div class="bg-white rounded-xl border border-gray-200 p-6 text-center">
-                <div class="w-12 h-12 mx-auto mb-3 flex items-center justify-center rounded-xl bg-primary-50 text-primary-600">
-                    <!-- Apretón de manos / confianza -->
+            <div class="bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-md transition">
+                <div class="w-12 h-12 mb-4 flex items-center justify-center rounded-xl bg-primary-50 text-primary-600">
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
                 </div>
-                <h3 class="font-semibold text-gray-900 mb-2">{% trans "Confianza" %}</h3>
-                <p class="text-gray-500 text-sm">{% trans "Transparencia en precios y calidad en cada producto." %}</p>
+                <h3 class="font-bold text-gray-900 mb-2">{% trans "Confianza" %}</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">{% trans "Relaciones sólidas basadas en la transparencia y el cumplimiento estricto de plazos." %}</p>
             </div>
-            <div class="bg-white rounded-xl border border-gray-200 p-6 text-center">
-                <div class="w-12 h-12 mx-auto mb-3 flex items-center justify-center rounded-xl bg-yellow-50 text-yellow-600">
-                    <!-- Rayo / agilidad -->
+            <div class="bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-md transition">
+                <div class="w-12 h-12 mb-4 flex items-center justify-center rounded-xl bg-yellow-50 text-yellow-600">
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>
                 </div>
-                <h3 class="font-semibold text-gray-900 mb-2">{% trans "Agilidad" %}</h3>
-                <p class="text-gray-500 text-sm">{% trans "Despacho rápido para que tu obra no pare." %}</p>
+                <h3 class="font-bold text-gray-900 mb-2">{% trans "Agilidad" %}</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">{% trans "Logística optimizada para que tu obra nunca se detenga por falta de materiales." %}</p>
             </div>
-            <div class="bg-white rounded-xl border border-gray-200 p-6 text-center">
-                <div class="w-12 h-12 mx-auto mb-3 flex items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                    <!-- Estrella / calidad -->
+            <div class="bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-md transition">
+                <div class="w-12 h-12 mb-4 flex items-center justify-center rounded-xl bg-red-50 text-red-500">
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" /></svg>
                 </div>
-                <h3 class="font-semibold text-gray-900 mb-2">{% trans "Calidad" %}</h3>
-                <p class="text-gray-500 text-sm">{% trans "Solo trabajamos con marcas líderes del mercado." %}</p>
+                <h3 class="font-bold text-gray-900 mb-2">{% trans "Calidad" %}</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">{% trans "Selección rigurosa de proveedores líderes para asegurar durabilidad y rendimiento." %}</p>
             </div>
-            <div class="bg-white rounded-xl border border-gray-200 p-6 text-center">
-                <div class="w-12 h-12 mx-auto mb-3 flex items-center justify-center rounded-xl bg-green-50 text-green-600">
-                    <!-- Chat / cercanía -->
+            <div class="bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-md transition">
+                <div class="w-12 h-12 mb-4 flex items-center justify-center rounded-xl bg-green-50 text-green-600">
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" /></svg>
                 </div>
-                <h3 class="font-semibold text-gray-900 mb-2">{% trans "Cercanía" %}</h3>
-                <p class="text-gray-500 text-sm">{% trans "Atención personalizada por WhatsApp y email." %}</p>
+                <h3 class="font-bold text-gray-900 mb-2">{% trans "Cercanía" %}</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">{% trans "Asesoramiento personalizado de profesional a profesional en cada etapa." %}</p>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Números -->
-<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-        <div>
-            <span class="text-3xl font-bold text-primary-600 block">500+</span>
-            <span class="text-sm text-gray-500">{% trans "Productos disponibles" %}</span>
+<!-- Equipo dinámico desde admin -->
+{% if team %}
+<section id="equipo" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+    <div class="text-center mb-12">
+        <span class="text-xs font-bold text-primary-600 uppercase tracking-widest">{% trans "Capital humano" %}</span>
+        <h2 class="text-3xl font-bold text-gray-900 mt-2">{% trans "El equipo detrás de tu obra" %}</h2>
+        <p class="text-gray-500 text-sm mt-2 max-w-xl mx-auto">{% trans "Profesionales con décadas de experiencia en ingeniería, logística y gestión de suministros a tu servicio." %}</p>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
+        {% for member in team %}
+        <div class="text-center">
+            <div class="w-36 h-36 mx-auto rounded-2xl overflow-hidden mb-4 bg-gray-100">
+                {% if member.photo %}
+                    <img src="{{ member.photo.url }}" alt="{{ member.name }}" class="w-full h-full object-cover">
+                {% else %}
+                    <div class="w-full h-full flex items-center justify-center bg-primary-50 text-primary-600">
+                        <svg class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+                    </div>
+                {% endif %}
+            </div>
+            <h3 class="font-bold text-gray-900">{{ member.name }}</h3>
+            <p class="text-xs text-primary-600 font-semibold uppercase tracking-wider">{{ member.role }}</p>
         </div>
-        <div>
-            <span class="text-3xl font-bold text-primary-600 block">6</span>
-            <span class="text-sm text-gray-500">{% trans "Categorías" %}</span>
-        </div>
-        <div>
-            <span class="text-3xl font-bold text-primary-600 block">24hs</span>
-            <span class="text-sm text-gray-500">{% trans "Despacho express" %}</span>
-        </div>
-        <div>
-            <span class="text-3xl font-bold text-primary-600 block">100%</span>
-            <span class="text-sm text-gray-500">{% trans "Pagos seguros" %}</span>
-        </div>
+        {% endfor %}
     </div>
 </section>
+{% endif %}
 
-<!-- Ubicación con Google Maps -->
-<section class="bg-gray-50 py-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            <div>
-                <h2 class="text-2xl font-bold text-gray-900 mb-4">{% trans "Visitanos" %}</h2>
-                <div class="space-y-3 text-gray-600">
-                    <p class="flex items-start gap-3">
-                        <span class="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-lg bg-primary-50 text-primary-600">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
-                        </span>
-                        <span>Av. Corrientes 1234, Piso 2<br>CABA, Buenos Aires, Argentina<br>CP C1043AAZ</span>
-                    </p>
-                    <p class="flex items-center gap-3">
-                        <span class="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-lg bg-primary-50 text-primary-600">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" /></svg>
-                        </span>
-                        <span>+54 11 5573-9987</span>
-                    </p>
-                    <p class="flex items-center gap-3">
-                        <span class="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-lg bg-primary-50 text-primary-600">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
-                        </span>
-                        <span>info@ferrelonstock.com</span>
-                    </p>
-                    <p class="flex items-center gap-3">
-                        <span class="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-lg bg-primary-50 text-primary-600">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        </span>
-                        <span>{% trans "Lunes a Viernes 8:00 - 18:00" %}<br>{% trans "Sábados 9:00 - 14:00" %}</span>
-                    </p>
-                </div>
-            </div>
-            <div class="rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-                <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3284.016887889516!2d-58.38375908477039!3d-34.60373888045944!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bccacb4f5403e3%3A0x3f0171b68cb3a16c!2sAv.%20Corrientes%201234%2C%20C1043AAZ%20CABA!5e0!3m2!1ses-419!2sar!4v1710000000000!5m2!1ses-419!2sar"
-                    width="100%"
-                    height="300"
-                    style="border:0;"
-                    allowfullscreen=""
-                    loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade">
-                </iframe>
-            </div>
+<!-- CTA separado del footer -->
+<section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-gray-50 border border-gray-200 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div>
+            <h2 class="text-lg font-bold text-gray-900">{% trans "¿Listo para iniciar tu próximo proyecto?" %}</h2>
+            <p class="text-gray-500 text-xs">{% trans "Solicitá tu presupuesto personalizado y recibí asesoramiento técnico sin cargo." %}</p>
         </div>
-    </div>
-</section>
-
-<!-- CTA -->
-<section class="bg-primary-600 text-white py-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-2xl font-bold mb-4">{% trans "¿Listo para empezar tu proyecto?" %}</h2>
-        <p class="text-primary-100 mb-6">{% trans "Explorá nuestro catálogo o contactanos por WhatsApp." %}</p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="{% url 'shop:product_list' %}" class="bg-white text-primary-700 font-semibold px-8 py-3 rounded-lg hover:bg-primary-50 transition">{% trans "Ver productos" %}</a>
-            <a href="https://api.whatsapp.com/send?text=Hola%20FerrelonStock%2C%20tengo%20una%20consulta" target="_blank" class="border-2 border-white text-white font-semibold px-8 py-3 rounded-lg hover:bg-primary-700 transition flex items-center justify-center gap-2">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                {% trans "WhatsApp" %}
-            </a>
+        <div class="flex gap-3">
+            <a href="{% url 'shop:product_list' %}" class="inline-flex items-center gap-2 bg-primary-600 text-white font-semibold px-6 py-2.5 rounded-lg hover:bg-primary-700 transition text-sm whitespace-nowrap">{% trans "Ver Catálogo" %}</a>
+            <a href="https://api.whatsapp.com/send?text=Hola%20FerrelonStock%2C%20necesito%20un%20presupuesto" target="_blank" class="inline-flex items-center gap-2 bg-green-500 text-white font-semibold px-6 py-2.5 rounded-lg hover:bg-green-600 transition text-sm whitespace-nowrap">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                WhatsApp</a>
         </div>
     </div>
 </section>
