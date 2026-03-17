@@ -16,8 +16,8 @@ env = environ.Env(
 )
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'), overwrite=False) if os.path.exists(os.path.join(BASE_DIR, '.env')) else None
 
-SECRET_KEY = env('SECRET_KEY')
-DEBUG = env('DEBUG')
+SECRET_KEY = env('SECRET_KEY', default='unsafe-secret-key-change-in-production')
+DEBUG = env.bool('DEBUG', default=False)
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1', '.onrender.com'])
 
 # Application definition
@@ -153,12 +153,12 @@ CART_SESSION_ID = 'cart'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Stripe
-STRIPE_PUBLIC_KEY = env('STRIPE_PUBLIC_KEY')
-STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY')
+STRIPE_PUBLIC_KEY = env('STRIPE_PUBLIC_KEY', default='')
+STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='')
 
 # Mercado Pago
-MP_PUBLIC_KEY = env('MP_PUBLIC_KEY')
-MP_ACCESS_TOKEN = env('MP_ACCESS_TOKEN')
+MP_PUBLIC_KEY = env('MP_PUBLIC_KEY', default='')
+MP_ACCESS_TOKEN = env('MP_ACCESS_TOKEN', default='')
 
 # Shipping webhook
 SHIPPING_WEBHOOK_SECRET = env('SHIPPING_WEBHOOK_SECRET', default='change-me')
