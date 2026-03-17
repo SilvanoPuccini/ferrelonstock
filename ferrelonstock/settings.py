@@ -27,7 +27,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'cloudinary_storage',
+    # 'cloudinary_storage',  # Solo se usa via STORAGES
     'cloudinary',
     'django.contrib.staticfiles',
     'django.contrib.postgres',
@@ -179,10 +179,9 @@ STORAGES = {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
-
 # Seguridad básica (se sobreescribe en producción)
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
