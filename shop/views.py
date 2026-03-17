@@ -1,8 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView
 from django.db.models import Q
 from django.contrib.postgres.search import TrigramSimilarity
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from .models import Product, Category, Brand
+from .forms import ReviewForm
 
 
 class ProductListView(ListView):
@@ -42,11 +45,7 @@ class ProductListView(ListView):
         context['current_brand'] = self.kwargs.get('brand_slug', '')
         context['search_query'] = self.request.GET.get('q', '')
         return context
-	
-    def get_template_names(self):
-        if self.request.headers.get('HX-Request'):
-            return ['shop/_product_grid.html']
-        return [self.template_name]
+
 
 class ProductDetailView(DetailView):
     model = Product
@@ -63,7 +62,32 @@ class ProductDetailView(DetailView):
             category=self.object.category, available=True
         ).exclude(pk=self.object.pk).select_related('brand')[:4]
         context['gallery'] = self.object.images.all()
+        context['reviews'] = self.object.reviews.select_related('user')
+        context['review_form'] = ReviewForm()
+        # Verificar si el usuario ya dejó review
+        if self.request.user.is_authenticated:
+            context['user_has_reviewed'] = self.object.reviews.filter(user=self.request.user).exists()
         return context
+
+
+@login_required
+def submit_review(request, slug):
+    product = get_object_or_404(Product, slug=slug, available=True)
+
+    if product.reviews.filter(user=request.user).exists():
+        messages.warning(request, 'Ya dejaste una valoración para este producto.')
+        return redirect('shop:product_detail', slug=slug)
+
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.product = product
+            review.user = request.user
+            review.save()
+            messages.success(request, 'Gracias por tu valoración.')
+
+    return redirect('shop:product_detail', slug=slug)
 
 
 def offers_list(request):

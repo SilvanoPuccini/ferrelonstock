@@ -91,6 +91,15 @@ class Product(models.Model):
             return self.discount_price
         return self.price
 
+    @property
+    def avg_rating(self):
+        from django.db.models import Avg
+        result = self.reviews.aggregate(Avg('rating'))['rating__avg']
+        return round(result, 1) if result else 0
+
+    @property
+    def review_count(self):
+        return self.reviews.count()
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images', verbose_name='Producto')
@@ -104,3 +113,22 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return f'Imagen {self.order} de {self.product.name}'
+
+
+class Review(models.Model):
+    RATING_CHOICES = [(i, str(i)) for i in range(1, 6)]
+
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews', verbose_name='Producto')
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='reviews', verbose_name='Usuario')
+    rating = models.PositiveIntegerField('Valoración', choices=RATING_CHOICES)
+    comment = models.TextField('Comentario', blank=True)
+    created_at = models.DateTimeField('Fecha', auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Valoración'
+        verbose_name_plural = 'Valoraciones'
+        ordering = ['-created_at']
+        unique_together = ['product', 'user']
+
+    def __str__(self):
+        return f'{self.user.first_name or self.user.email} - {self.product.name} ({self.rating}/5)'
