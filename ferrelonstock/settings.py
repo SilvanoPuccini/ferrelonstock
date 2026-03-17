@@ -1,5 +1,7 @@
 from pathlib import Path
+import os
 import environ
+import dj_database_url
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
@@ -16,7 +18,7 @@ environ.Env.read_env(BASE_DIR / '.env')
 
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1', '.onrender.com'])
 
 # Application definition
 INSTALLED_APPS = [
@@ -86,10 +88,18 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ferrelonstock.wsgi.application'
 
-# Database
 DATABASES = {
-    'default': env.db('DATABASE_URL')
+    'default': env.db('DATABASE_URL', default='postgres://ferrelon:ferrelon123@localhost:5432/ferrelonstock_db')
 }
+
+# Render provee DATABASE_URL automáticamente
+RENDER_DATABASE_URL = os.environ.get('DATABASE_URL')
+if RENDER_DATABASE_URL:
+    DATABASES['default'] = dj_database_url.config(
+        default=RENDER_DATABASE_URL,
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [

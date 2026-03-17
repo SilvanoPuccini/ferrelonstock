@@ -1,0 +1,26 @@
+databases:
+  - name: ferrelonstock-db
+    plan: free
+    databaseName: ferrelonstock
+    user: ferrelon
+
+services:
+  - type: web
+    name: ferrelonstock
+    plan: free
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn ferrelonstock.wsgi:application"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ferrelonstock-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: PYTHON_VERSION
+        value: "3.10.12"
