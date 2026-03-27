@@ -128,7 +128,7 @@ El proyecto está organizado en apps independientes con responsabilidades claras
 - Generación de comprobante/factura en PDF con datos legales argentinos
 
 ### 💳 Pagos
-- **Stripe**: Flujo completo con Checkout Sessions (API para simular comprar N° OCR tarjeta: 4242 4242 4242 4242 - VTO 03/28 CVC 123 - confirmar compra o pagar)
+- **Stripe**: Flujo completo con Checkout Sessions (API para simular compra N° OCR tarjeta: 4242 4242 4242 4242 - VTO 03/28 CVC 123 - confirmar compra o pagar)
 - **Mercado Pago**: Integración con API de preferencias
 - Selector de método de pago en el checkout
 - Registro de pagos en modelo Payment
