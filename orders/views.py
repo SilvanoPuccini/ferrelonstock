@@ -2,10 +2,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
+from django.db import models, transaction
 from decimal import Decimal, InvalidOperation
 from .models import Order, OrderItem, OrderMessage
 from .forms import CheckoutForm, OrderMessageForm
 from cart.cart import Cart
+from shop.models import Product
 from shipping.models import ShippingMethod, ShippingZone
 from shipping.services import get_zones
 
@@ -39,38 +41,46 @@ def checkout(request):
             order.shipping_method = method
             order.shipping_zone = zone
             order.shipping_price = shipping_price
-            order.save()
 
-            for item in cart:
-                OrderItem.objects.create(
-                    order=order, product=item['product'],
-                    price=item['price'], quantity=item['quantity']
-                )
-                product = item['product']
-                product.stock -= item['quantity']
-                if product.stock <= 0:
-                    product.stock = 0
-                    product.available = False
-                product.save()
-	   # Guardar datos en el perfil si están vacíos
-            profile = request.user.profile
-            if not profile.phone and order.phone:
-                profile.phone = order.phone
-            if not profile.address and order.address:
-                profile.address = order.address
-            if not profile.city and order.city:
-                profile.city = order.city
-            if not profile.region and order.region:
-                profile.region = order.region
-            if not profile.postal_code and order.postal_code:
-                profile.postal_code = order.postal_code
-            profile.save()
+            with transaction.atomic():
+                order.save()
 
-            if not request.user.first_name and order.first_name:
-                request.user.first_name = order.first_name
-                request.user.last_name = order.last_name
-                request.user.save() 
-	   
+                for item in cart:
+                    OrderItem.objects.create(
+                        order=order, product=item['product'],
+                        price=item['price'], quantity=item['quantity']
+                    )
+                    # Atomic stock deduction to prevent race conditions
+                    product = item['product']
+                    Product.objects.filter(pk=product.pk).update(
+                        stock=models.F('stock') - item['quantity']
+                    )
+                    # Refresh and check if stock went to zero
+                    product.refresh_from_db()
+                    if product.stock <= 0:
+                        Product.objects.filter(pk=product.pk).update(
+                            stock=0, available=False
+                        )
+
+                # Guardar datos en el perfil si están vacíos
+                profile = request.user.profile
+                if not profile.phone and order.phone:
+                    profile.phone = order.phone
+                if not profile.address and order.address:
+                    profile.address = order.address
+                if not profile.city and order.city:
+                    profile.city = order.city
+                if not profile.region and order.region:
+                    profile.region = order.region
+                if not profile.postal_code and order.postal_code:
+                    profile.postal_code = order.postal_code
+                profile.save()
+
+                if not request.user.first_name and order.first_name:
+                    request.user.first_name = order.first_name
+                    request.user.last_name = order.last_name
+                    request.user.save()
+
             cart.clear()
             messages.success(request, _(f'¡Pedido #{order.pk} creado con éxito!'))
             return redirect('payments:payment_select', order_id=order.pk)
