@@ -10,7 +10,11 @@ python manage.py migrate
 python manage.py shell -c "
 from django.contrib.auth.models import User
 if not User.objects.filter(is_superuser=True).exists():
-    User.objects.create_superuser('admin', 'admin@ferrelonstock.com', 'FerrelonAdmin2026!')
+    User.objects.create_superuser(
+        'admin',
+        'admin@ferrelonstock.com',
+        __import__('os').environ.get('ADMIN_PASSWORD', 'FerrelonAdmin2026!')
+    )
     print('Superusuario creado')
 else:
     print('Superusuario ya existe')
