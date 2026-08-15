@@ -5,6 +5,8 @@ pip install --upgrade pip
 pip install -r requirements.txt
 python manage.py collectstatic --noinput
 python manage.py migrate
+# Crear la tabla de la cache compartida (rate limit de login entre workers)
+python manage.py createcachetable
 
 # Configurar el Site con el dominio real (links de emails apuntan bien)
 python manage.py ensure_site

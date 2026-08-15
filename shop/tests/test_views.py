@@ -2,6 +2,7 @@ import pytest
 from decimal import Decimal
 from django.test import Client
 from django.contrib.auth.models import User
+from django.urls import reverse
 from shop.models import Category, Brand, Product
 
 
@@ -45,6 +46,107 @@ class TestProductListView:
         )
         response = self.client.get('/shop/')
         assert 'Oculto' not in response.content.decode()
+
+    def test_filter_by_min_price(self):
+        Product.objects.create(
+            name='Barato', slug='barato', category=self.cat,
+            price=Decimal('10000'), stock=5, available=True
+        )
+        response = self.client.get(reverse('shop:product_list'), {'min_price': '20000'})
+        content = response.content.decode()
+        assert 'Taladro Bosch' in content
+        assert 'Barato' not in content
+
+    def test_filter_by_max_price(self):
+        Product.objects.create(
+            name='Caro', slug='caro', category=self.cat,
+            price=Decimal('100000'), stock=5, available=True
+        )
+        response = self.client.get(reverse('shop:product_list'), {'max_price': '30000'})
+        content = response.content.decode()
+        assert 'Taladro Bosch' in content
+        assert 'Caro' not in content
+
+    def test_filter_by_price_bounds(self):
+        Product.objects.create(
+            name='Medio', slug='medio', category=self.cat,
+            price=Decimal('20000'), stock=5, available=True
+        )
+        Product.objects.create(
+            name='Caro', slug='caro', category=self.cat,
+            price=Decimal('100000'), stock=5, available=True
+        )
+        response = self.client.get(
+            reverse('shop:product_list'), {'min_price': '15000', 'max_price': '30000'}
+        )
+        content = response.content.decode()
+        assert 'Taladro Bosch' in content
+        assert 'Medio' in content
+        assert 'Caro' not in content
+
+    def test_filter_uses_effective_price(self):
+        Product.objects.create(
+            name='Oferta cara', slug='oferta-cara', category=self.cat,
+            price=Decimal('100000'), discount_price=Decimal('20000'), stock=5, available=True
+        )
+        response = self.client.get(reverse('shop:product_list'), {'max_price': '22000'})
+        content = response.content.decode()
+        assert 'Oferta cara' in content
+        assert 'Taladro Bosch' not in content
+
+    def test_invalid_price_param_ignored(self):
+        response = self.client.get(
+            reverse('shop:product_list'), {'min_price': 'abc', 'max_price': ''}
+        )
+        content = response.content.decode()
+        assert response.status_code == 200
+        assert 'Taladro Bosch' in content
+
+    def test_sort_by_price_asc(self):
+        Product.objects.create(
+            name='Barato', slug='barato', category=self.cat,
+            price=Decimal('10000'), stock=5, available=True
+        )
+        response = self.client.get(reverse('shop:product_list'), {'sort': 'price_asc'})
+        content = response.content.decode()
+        assert content.index('Barato') < content.index('Taladro Bosch')
+
+    def test_sort_by_price_desc(self):
+        Product.objects.create(
+            name='Barato', slug='barato', category=self.cat,
+            price=Decimal('10000'), stock=5, available=True
+        )
+        response = self.client.get(reverse('shop:product_list'), {'sort': 'price_desc'})
+        content = response.content.decode()
+        assert content.index('Taladro Bosch') < content.index('Barato')
+
+    def test_sort_by_name(self):
+        Product.objects.create(
+            name='Amoladora', slug='amoladora', category=self.cat,
+            price=Decimal('10000'), stock=5, available=True
+        )
+        response = self.client.get(reverse('shop:product_list'), {'sort': 'name'})
+        content = response.content.decode()
+        assert content.index('Amoladora') < content.index('Taladro Bosch')
+
+    def test_invalid_sort_ignored(self):
+        response = self.client.get(reverse('shop:product_list'), {'sort': 'bogus'})
+        content = response.content.decode()
+        assert response.status_code == 200
+        assert 'Taladro Bosch' in content
+
+    def test_combined_category_and_price_filter(self):
+        other = Category.objects.create(name='Electricidad', slug='electricidad')
+        Product.objects.create(
+            name='Cable', slug='cable', category=other,
+            price=Decimal('10000'), stock=5, available=True
+        )
+        response = self.client.get(
+            reverse('shop:product_list_by_category', args=[self.cat.slug]), {'min_price': '20000'}
+        )
+        content = response.content.decode()
+        assert 'Taladro Bosch' in content
+        assert 'Cable' not in content
 
 
 @pytest.mark.django_db
