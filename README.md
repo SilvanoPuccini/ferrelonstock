@@ -22,7 +22,7 @@
 [https://ferrelonstock.onrender.com](https://ferrelonstock.onrender.com)
 
 👤 **Credenciales de demo:**  
-- **Admin:** `admin` / `FerrelonAdmin2026!`
+- **Admin:** se crea en el build a partir de la variable de entorno `ADMIN_PASSWORD` (no está documentado en el código).
 
 ---
 
@@ -342,7 +342,7 @@ pip install -r requirements.txt
 ### 4. Crear base de datos PostgreSQL
 ```sql
 CREATE DATABASE ferrelonstock_db;
-CREATE USER ferrelon WITH PASSWORD 'ferrelon123';
+CREATE USER ferrelon;  -- sin password: se usa trust auth / socket local
 GRANT ALL PRIVILEGES ON DATABASE ferrelonstock_db TO ferrelon;
 ALTER ROLE ferrelon CREATEDB;
 ```
@@ -364,7 +364,7 @@ Editar `.env` con tus credenciales:
 SECRET_KEY=tu-secret-key-super-segura
 DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1
-DATABASE_URL=postgres://ferrelon:ferrelon123@localhost:5432/ferrelonstock_db
+DATABASE_URL=postgres://ferrelon@localhost:5432/ferrelonstock_db
 CLOUDINARY_CLOUD_NAME=tu-cloud
 CLOUDINARY_API_KEY=tu-key
 CLOUDINARY_API_SECRET=tu-secret

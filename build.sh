@@ -6,15 +6,15 @@ pip install -r requirements.txt
 python manage.py collectstatic --noinput
 python manage.py migrate
 
-# Crear superusuario si no existe
+# Crear superusuario si no existe (requiere ADMIN_PASSWORD)
 python manage.py shell -c "
+import os
 from django.contrib.auth.models import User
 if not User.objects.filter(is_superuser=True).exists():
-    User.objects.create_superuser(
-        'admin',
-        'admin@ferrelonstock.com',
-        __import__('os').environ.get('ADMIN_PASSWORD', 'FerrelonAdmin2026!')
-    )
+    password = os.environ.get('ADMIN_PASSWORD')
+    if not password:
+        raise SystemExit('ADMIN_PASSWORD no definida. Seteá la variable de entorno ADMIN_PASSWORD para crear el superusuario.')
+    User.objects.create_superuser('admin', 'admin@ferrelonstock.com', password)
     print('Superusuario creado')
 else:
     print('Superusuario ya existe')

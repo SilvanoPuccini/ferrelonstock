@@ -3,13 +3,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 from django.db import models, transaction
-from decimal import Decimal, InvalidOperation
 from .models import Order, OrderItem, OrderMessage
 from .forms import CheckoutForm, OrderMessageForm
 from cart.cart import Cart
 from shop.models import Product
 from shipping.models import ShippingMethod, ShippingZone
-from shipping.services import get_zones
+from shipping.services import get_zones, calculate_shipping_price
 
 
 @login_required
@@ -29,18 +28,14 @@ def checkout(request):
             shipping_method_code = request.POST.get('shipping_method', 'pickup')
             shipping_zone_code = request.POST.get('shipping_zone', '')
 
-            try:
-                raw = request.POST.get('shipping_price', '0').strip().replace(',', '.')
-                shipping_price = Decimal(raw) if raw else Decimal('0')
-            except (InvalidOperation, ValueError):
-                shipping_price = Decimal('0')
-
-            method = ShippingMethod.objects.filter(code=shipping_method_code).first()
-            zone = ShippingZone.objects.filter(code=shipping_zone_code).first() if shipping_zone_code else None
+            # El precio de envío se calcula SIEMPRE en el servidor;
+            # nunca se confía en el shipping_price enviado por el cliente.
+            method = ShippingMethod.objects.filter(code=shipping_method_code, is_active=True).first()
+            zone = ShippingZone.objects.filter(code=shipping_zone_code, is_active=True).first() if shipping_zone_code else None
 
             order.shipping_method = method
             order.shipping_zone = zone
-            order.shipping_price = shipping_price
+            order.shipping_price = calculate_shipping_price(method, zone, cart.get_total_price())
 
             with transaction.atomic():
                 order.save()

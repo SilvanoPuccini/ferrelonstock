@@ -10,4 +10,8 @@ urlpatterns = [
     path('mp/<int:order_id>/', views.mp_checkout, name='mp_checkout'),
     path('mp/success/<int:order_id>/', views.mp_success, name='mp_success'),
     path('cancel/<int:order_id>/', views.payment_cancel, name='payment_cancel'),
+
+    # Webhooks firmados (sin login; la seguridad real es la firma)
+    path('webhook/stripe/', views.stripe_webhook, name='webhook_stripe'),
+    path('webhook/mp/', views.mp_webhook, name='webhook_mp'),
 ]
