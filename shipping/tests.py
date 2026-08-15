@@ -1,6 +1,6 @@
 import pytest
 import json
-from django.test import Client
+from django.test import Client, override_settings
 from django.contrib.auth.models import User
 from orders.models import Order
 from shipping.models import ShippingZone, ShippingMethod, ShippingConfig, Carrier, Shipment
@@ -45,3 +45,38 @@ class TestTrackingView:
         response = self.client.get(f'/shipping/tracking/{self.order.pk}/')
         assert response.status_code == 200
         assert response.status_code == 200  # Página de tracking carga OK
+
+
+@pytest.mark.django_db
+class TestShippingWebhookFailSafe:
+    """El webhook NUNCA autoriza si SHIPPING_WEBHOOK_SECRET está vacío."""
+
+    def _post(self, client, secret_header):
+        return client.post(
+            '/shipping/webhook/update/',
+            data=json.dumps({'tracking_number': 'X-1', 'status': 'in_transit'}).encode(),
+            content_type='application/json',
+            HTTP_X_WEBHOOK_SECRET=secret_header,
+        )
+
+    @override_settings(SHIPPING_WEBHOOK_SECRET='')
+    def test_empty_secret_rejects_even_with_token(self):
+        response = self._post(Client(), 'cualquier-token')
+        assert response.status_code == 401
+
+    @override_settings(SHIPPING_WEBHOOK_SECRET='')
+    def test_empty_secret_rejects_without_token(self):
+        response = self._post(Client(), '')
+        assert response.status_code == 401
+
+    def test_valid_secret_authorizes(self):
+        user = User.objects.create_user('shipper', 'shipper@test.com', 'pass123')
+        order = Order.objects.create(
+            user=user, first_name='Juan', last_name='Pérez',
+            email='juan@test.com', address='Calle 123', city='CABA',
+        )
+        carrier = Carrier.objects.create(name='Test Carrier', code='test-carrier')
+        Shipment.objects.create(order=order, carrier=carrier, tracking_number='X-1')
+        with override_settings(SHIPPING_WEBHOOK_SECRET='secret-valido'):
+            response = self._post(Client(), 'secret-valido')
+        assert response.status_code == 200

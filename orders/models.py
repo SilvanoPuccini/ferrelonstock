@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from shop.models import Product
+from .emails import send_order_status_update
 
 
 class Order(models.Model):
@@ -49,6 +50,33 @@ class Order(models.Model):
 
     def __str__(self):
         return f'Pedido #{self.pk} - {self.user.email}'
+
+    def save(self, *args, **kwargs):
+        """Guarda el pedido y notifica al cliente si el estado cambió.
+
+        - No notifica en creación (el objeto todavía no existía).
+        - No notifica si el nuevo estado es 'pending' (evita spam).
+        - El email falla silencioso (warning en logs); nunca rompe el flujo.
+        """
+        is_new = self._state.adding
+        previous_status = None
+        if not is_new:
+            previous_status = Order.objects.filter(
+                pk=self.pk
+            ).values_list('status', flat=True).first()
+
+        super().save(*args, **kwargs)
+
+        if (
+            not is_new
+            and previous_status is not None
+            and previous_status != self.status
+            and self.status != 'pending'
+        ):
+            try:
+                send_order_status_update(self)
+            except Exception:
+                pass
 
     @property
     def total(self):

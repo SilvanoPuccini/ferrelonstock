@@ -5,6 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from django.db import models, transaction
 from .models import Order, OrderItem, OrderMessage
 from .forms import CheckoutForm, OrderMessageForm
+from .emails import send_order_confirmation, send_new_order_admin_notification
 from cart.cart import Cart
 from shop.models import Product
 from shipping.models import ShippingMethod, ShippingZone
@@ -77,6 +78,12 @@ def checkout(request):
                     request.user.save()
 
             cart.clear()
+
+            # Emails transaccionales: fallan silencioso (warning en logs),
+            # nunca rompen el checkout.
+            send_order_confirmation(order)
+            send_new_order_admin_notification(order)
+
             messages.success(request, _(f'¡Pedido #{order.pk} creado con éxito!'))
             return redirect('payments:payment_select', order_id=order.pk)
     else:

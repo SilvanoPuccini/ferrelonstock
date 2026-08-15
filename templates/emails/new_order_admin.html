@@ -1,0 +1,82 @@
+{% extends 'emails/email_base.html' %}
+{% block subject %}Nuevo pedido #{{ order.pk }} — FerrelonStock{% endblock %}
+{% block order_number %}{{ order.pk }}{% endblock %}
+{% block content %}
+
+<h2 style="margin:0 0 8px;font-size:22px;color:#1c1917;">🔔 Nuevo pedido recibido</h2>
+<p style="margin:0 0 24px;color:#78716c;">
+    Se registró un pedido nuevo. Revisalo y gestioná el envío desde el panel de administración.
+</p>
+
+<!-- Cliente -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;background-color:#fafaf9;border:1px solid #e7e5e4;border-radius:6px;">
+    <tr>
+        <td style="padding:14px 18px;">
+            <p style="margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#78716c;">Cliente</p>
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#292524;">
+                <strong>{{ order.first_name }} {{ order.last_name }}</strong><br>
+                {{ order.email }}{% if order.phone %} &nbsp;•&nbsp; {{ order.phone }}{% endif %}
+            </p>
+        </td>
+    </tr>
+</table>
+
+<!-- Items -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:8px;">
+    <tr>
+        <th align="left" style="padding:10px 12px;background-color:#f5f5f4;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#78716c;border-bottom:2px solid #e7e5e4;">Producto</th>
+        <th align="center" style="padding:10px 12px;background-color:#f5f5f4;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#78716c;border-bottom:2px solid #e7e5e4;">Cant.</th>
+        <th align="right" style="padding:10px 12px;background-color:#f5f5f4;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#78716c;border-bottom:2px solid #e7e5e4;">Subtotal</th>
+    </tr>
+    {% for item in items %}
+    <tr>
+        <td style="padding:12px;border-bottom:1px solid #f5f5f4;color:#292524;">{{ item.product.name }}</td>
+        <td align="center" style="padding:12px;border-bottom:1px solid #f5f5f4;color:#292524;">{{ item.quantity }}</td>
+        <td align="right" style="padding:12px;border-bottom:1px solid #f5f5f4;color:#292524;font-weight:bold;">${{ item.get_total|floatformat:0 }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<!-- Totales -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:24px;">
+    <tr>
+        <td style="padding:8px 12px;color:#78716c;">Subtotal</td>
+        <td align="right" style="padding:8px 12px;color:#292524;">${{ subtotal|floatformat:0 }}</td>
+    </tr>
+    <tr>
+        <td style="padding:8px 12px;color:#78716c;">Envío</td>
+        <td align="right" style="padding:8px 12px;color:#292524;">
+            {% if shipping_price == 0 %}GRATIS{% else %}${{ shipping_price|floatformat:0 }}{% endif %}
+        </td>
+    </tr>
+    <tr>
+        <td style="padding:12px;background-color:#fff7ed;color:#9a3412;font-weight:bold;border-top:2px solid #fed7aa;">Total</td>
+        <td align="right" style="padding:12px;background-color:#fff7ed;font-size:16px;font-weight:bold;color:#ea580c;border-top:2px solid #fed7aa;">${{ total|floatformat:0 }}</td>
+    </tr>
+</table>
+
+<!-- Dirección -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;background-color:#fafaf9;border:1px solid #e7e5e4;border-radius:6px;">
+    <tr>
+        <td style="padding:14px 18px;">
+            <p style="margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#78716c;">Dirección de envío</p>
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#292524;">
+                {{ order.address }}, {{ order.city }}{% if order.region %}, {{ order.region }}{% endif %}{% if order.postal_code %} (CP {{ order.postal_code }}){% endif %}
+            </p>
+        </td>
+    </tr>
+</table>
+
+<!-- CTA admin -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+        <td align="center" style="padding:8px 0 16px;">
+            <a href="https://ferrelonstock.onrender.com{% url 'admin:orders_order_change' order.pk %}"
+               style="display:inline-block;background-color:#1e293b;color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:bold;text-decoration:none;padding:12px 28px;border-radius:8px;">
+                Gestionar en el admin
+            </a>
+        </td>
+    </tr>
+</table>
+
+{% endblock %}

@@ -14,6 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from orders.models import Order
+from orders.emails import send_payment_confirmation
 from .models import Payment
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -93,6 +94,8 @@ def stripe_success(request, order_id):
             order.status = 'preparing'
             order.payment_status = 'paid'
             order.save()
+            # Email al cliente (falla silencioso, nunca rompe el flujo).
+            send_payment_confirmation(order)
             messages.success(request, _('¡Pago realizado con éxito!'))
 
     return redirect('orders:order_detail', order_id=order.pk)
@@ -180,6 +183,9 @@ def _mark_order_paid(order, provider, transaction_id):
         order.status = 'preparing'
         order.payment_status = 'paid'
         order.save(update_fields=['status', 'payment_status'])
+
+    # Email al cliente (falla silencioso, nunca rompe el webhook).
+    send_payment_confirmation(order)
 
 
 def _resolve_stripe_order(charge):
