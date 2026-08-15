@@ -98,6 +98,21 @@ class TestPaymentSelectView:
         assert response.status_code == 200
         assert 'order' in response.context
 
+    def test_payment_select_shows_only_stripe(self):
+        """Mercado Pago ya no se ofrece como opción: la UI solo muestra Stripe."""
+        self.client.login(username='payerview', password='pass123')
+        order = Order.objects.create(
+            user=self.user, first_name='Juan', last_name='Pérez',
+            email='juan@test.com', address='Calle 123', city='CABA',
+            payment_status='unpaid',
+        )
+        response = self.client.get(f'/payments/select/{order.pk}/')
+        content = response.content.decode()
+        assert 'Pagar con Stripe' in content
+        # El link al checkout de Mercado Pago ya no existe; solo el de Stripe.
+        assert '/payments/mp/' not in content
+        assert '/payments/stripe/' in content
+
     def test_cannot_access_others_order(self):
         other = User.objects.create_user('other', 'other@test.com', 'pass123')
         order = Order.objects.create(

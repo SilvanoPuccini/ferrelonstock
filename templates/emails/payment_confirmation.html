@@ -1,0 +1,58 @@
+{% extends 'emails/email_base.html' %}
+{% block subject %}¡Pago recibido! Pedido #{{ order.pk }} — FerrelonStock{% endblock %}
+{% block order_number %}{{ order.pk }}{% endblock %}
+{% block content %}
+
+<h2 style="margin:0 0 8px;font-size:22px;color:#1c1917;">¡Pago recibido! 🎉</h2>
+<p style="margin:0 0 24px;color:#78716c;">
+    Hola <strong style="color:#1c1917;">{{ order.first_name }}</strong>, acreditamos el pago de tu pedido
+    <strong style="color:#ea580c;">#{{ order.pk }}</strong>. ¡Gracias por tu compra!
+</p>
+
+<!-- Resumen pago -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;background-color:#f0fdf4;border:1px solid #bbf7d0;border-left:4px solid #16a34a;border-radius:6px;">
+    <tr>
+        <td style="padding:14px 18px;">
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#166534;">
+                Pago <strong>acreditado</strong> &mdash; Total: <strong>${{ total|floatformat:0 }}</strong>
+            </p>
+        </td>
+    </tr>
+</table>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:24px;">
+    <tr>
+        <td style="padding:8px 12px;color:#78716c;">Estado del pedido</td>
+        <td align="right" style="padding:8px 12px;color:#292524;"><strong>{{ status_display }}</strong></td>
+    </tr>
+    <tr>
+        <td style="padding:8px 12px;border-top:1px solid #f5f5f4;color:#78716c;">Envío</td>
+        <td align="right" style="padding:8px 12px;border-top:1px solid #f5f5f4;color:#292524;">
+            {% if shipping_price == 0 %}GRATIS{% else %}${{ shipping_price|floatformat:0 }}{% endif %}
+        </td>
+    </tr>
+    <tr>
+        <td style="padding:10px 12px;background-color:#fff7ed;color:#9a3412;font-weight:bold;border-top:2px solid #fed7aa;">Total pagado</td>
+        <td align="right" style="padding:10px 12px;background-color:#fff7ed;font-size:16px;font-weight:bold;color:#ea580c;border-top:2px solid #fed7aa;">${{ total|floatformat:0 }}</td>
+    </tr>
+</table>
+
+<p style="margin:0 0 24px;color:#292524;">
+    Tu pedido ya está <strong>en preparación</strong>. Te vamos a avisar por correo cuando salga hacia tu dirección.
+</p>
+
+<!-- CTA -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+        <td align="center" style="padding:8px 0 16px;">
+            <a href="{% url 'orders:order_detail' order.pk %}"
+               style="display:inline-block;background-color:#ea580c;color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:bold;text-decoration:none;padding:12px 28px;border-radius:8px;">
+                Seguir mi pedido
+            </a>
+        </td>
+    </tr>
+</table>
+
+<p style="margin:0;color:#a8a29e;font-size:12px;">¿Tenés dudas? Respondé a este correo y te ayudamos a la brevedad.</p>
+
+{% endblock %}

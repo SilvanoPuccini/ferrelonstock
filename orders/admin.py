@@ -48,20 +48,28 @@ class OrderMessageInline(admin.TabularInline):
     fields = ['sender', 'message_type', 'subject', 'body', 'is_from_staff', 'is_read', 'created_at']
 
 
+def _change_status(queryset, status):
+    """Cambia el estado guardando cada pedido para que el email de
+    actualización se dispare (queryset.update() bypasea Order.save())."""
+    for order in queryset:
+        order.status = status
+        order.save(update_fields=['status'])
+
+
 def mark_preparing(modeladmin, request, queryset):
-    queryset.update(status='preparing')
+    _change_status(queryset, 'preparing')
 mark_preparing.short_description = 'Marcar en preparacion'
 
 def mark_shipped(modeladmin, request, queryset):
-    queryset.update(status='shipped')
+    _change_status(queryset, 'shipped')
 mark_shipped.short_description = 'Marcar como enviado'
 
 def mark_delivered(modeladmin, request, queryset):
-    queryset.update(status='delivered')
+    _change_status(queryset, 'delivered')
 mark_delivered.short_description = 'Marcar como entregado'
 
 def mark_cancelled(modeladmin, request, queryset):
-    queryset.update(status='cancelled')
+    _change_status(queryset, 'cancelled')
 mark_cancelled.short_description = 'Marcar como cancelado'
 
 def export_orders_csv(modeladmin, request, queryset):

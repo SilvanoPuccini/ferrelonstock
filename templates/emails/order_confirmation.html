@@ -1,0 +1,90 @@
+{% extends 'emails/email_base.html' %}
+{% block subject %}Pedido #{{ order.pk }} confirmado — FerrelonStock{% endblock %}
+{% block order_number %}{{ order.pk }}{% endblock %}
+{% block content %}
+
+<h2 style="margin:0 0 8px;font-size:22px;color:#1c1917;">¡Gracias por tu compra!</h2>
+<p style="margin:0 0 24px;color:#78716c;">
+    Hola <strong style="color:#1c1917;">{{ order.first_name }}</strong>, confirmamos tu pedido
+    <strong style="color:#ea580c;">#{{ order.pk }}</strong>. Este es el detalle:
+</p>
+
+<!-- Estado -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+    <tr>
+        <td style="background-color:#fff7ed;border:1px solid #fed7aa;border-left:4px solid #ea580c;padding:14px 18px;border-radius:6px;">
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#9a3412;">
+                Estado del pedido: <strong>{{ status_display }}</strong>
+            </p>
+        </td>
+    </tr>
+</table>
+
+<!-- Items -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:8px;">
+    <tr>
+        <th align="left" style="padding:10px 12px;background-color:#f5f5f4;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#78716c;border-bottom:2px solid #e7e5e4;">Producto</th>
+        <th align="center" style="padding:10px 12px;background-color:#f5f5f4;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#78716c;border-bottom:2px solid #e7e5e4;">Cant.</th>
+        <th align="right" style="padding:10px 12px;background-color:#f5f5f4;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#78716c;border-bottom:2px solid #e7e5e4;">Precio</th>
+        <th align="right" style="padding:10px 12px;background-color:#f5f5f4;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#78716c;border-bottom:2px solid #e7e5e4;">Subtotal</th>
+    </tr>
+    {% for item in items %}
+    <tr>
+        <td style="padding:12px;border-bottom:1px solid #f5f5f4;color:#292524;">{{ item.product.name }}</td>
+        <td align="center" style="padding:12px;border-bottom:1px solid #f5f5f4;color:#292524;">{{ item.quantity }}</td>
+        <td align="right" style="padding:12px;border-bottom:1px solid #f5f5f4;color:#57534e;">${{ item.price|floatformat:0 }}</td>
+        <td align="right" style="padding:12px;border-bottom:1px solid #f5f5f4;color:#292524;font-weight:bold;">${{ item.get_total|floatformat:0 }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<!-- Totales -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:24px;">
+    <tr>
+        <td style="padding:8px 12px;color:#78716c;">Subtotal</td>
+        <td align="right" style="padding:8px 12px;color:#292524;">${{ subtotal|floatformat:0 }}</td>
+    </tr>
+    <tr>
+        <td style="padding:8px 12px;color:#78716c;">Envío</td>
+        <td align="right" style="padding:8px 12px;color:#292524;">
+            {% if shipping_price == 0 %}GRATIS{% else %}${{ shipping_price|floatformat:0 }}{% endif %}
+        </td>
+    </tr>
+    <tr>
+        <td style="padding:12px;background-color:#fff7ed;color:#9a3412;font-weight:bold;border-top:2px solid #fed7aa;">Total</td>
+        <td align="right" style="padding:12px;background-color:#fff7ed;font-size:18px;font-weight:bold;color:#ea580c;border-top:2px solid #fed7aa;">${{ total|floatformat:0 }}</td>
+    </tr>
+</table>
+
+<!-- Dirección -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;background-color:#fafaf9;border:1px solid #e7e5e4;border-radius:6px;">
+    <tr>
+        <td style="padding:14px 18px;">
+            <p style="margin:0 0 4px;font-family:Arial,Helvetica,sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#78716c;">Dirección de envío</p>
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#292524;">
+                {{ order.first_name }} {{ order.last_name }}<br>
+                {{ order.address }}, {{ order.city }}{% if order.region %}, {{ order.region }}{% endif %}{% if order.postal_code %} (CP {{ order.postal_code }}){% endif %}
+            </p>
+        </td>
+    </tr>
+</table>
+
+<p style="margin:0 0 24px;color:#78716c;">
+    {% if order.payment_status == 'paid' %}Tu pago ya fue acreditado y estamos preparando tu pedido.{% else %}Si elegiste pagar por tarjeta, completá el pago para que empecemos a preparar tu pedido.{% endif %}
+</p>
+
+<!-- CTA -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+        <td align="center" style="padding:8px 0 16px;">
+            <a href="{% url 'orders:order_detail' order.pk %}"
+               style="display:inline-block;background-color:#ea580c;color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:bold;text-decoration:none;padding:12px 28px;border-radius:8px;">
+                Ver mi pedido
+            </a>
+        </td>
+    </tr>
+</table>
+
+<p style="margin:0;color:#a8a29e;font-size:12px;">¿Tenés dudas? Respondé a este correo y te ayudamos a la brevedad.</p>
+
+{% endblock %}

@@ -1,0 +1,15 @@
+Nuevo pedido #{{ order.pk }} recibido.
+
+Cliente: {{ order.first_name }} {{ order.last_name }}
+Email: {{ order.email }}{% if order.phone %} | Teléfono: {{ order.phone }}{% endif %}
+
+Detalle:
+{% for item in items %}- {{ item.quantity }}x {{ item.product.name }} — ${{ item.get_total|floatformat:0 }}
+{% endfor %}
+Envío: ${{ shipping_price|floatformat:0 }}
+Total: ${{ total|floatformat:0 }}
+
+Dirección de envío:
+{{ order.address }}, {{ order.city }}{% if order.region %}, {{ order.region }}{% endif %}{% if order.postal_code %} (CP {{ order.postal_code }}){% endif %}
+
+Ingresá al panel de administración para gestionar el pedido.

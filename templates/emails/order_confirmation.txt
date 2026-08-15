@@ -1,0 +1,19 @@
+Hola {{ order.first_name }},
+
+¡Gracias por tu compra! Tu pedido #{{ order.pk }} fue confirmado.
+
+Detalle del pedido:
+{% for item in items %}- {{ item.quantity }}x {{ item.product.name }} — ${{ item.price|floatformat:0 }}
+{% endfor %}
+Subtotal: ${{ subtotal|floatformat:0 }}
+Envío: ${{ shipping_price|floatformat:0 }}
+Total: ${{ total|floatformat:0 }}
+
+Dirección de envío:
+{{ order.address }}, {{ order.city }}{% if order.region %}, {{ order.region }}{% endif %}{% if order.postal_code %} (CP {{ order.postal_code }}){% endif %}
+
+Estado del pedido: {{ status_display }}
+
+Si elegiste pagar por tarjeta, completá el pago para que empecemos a preparar tu pedido.
+
+¡Gracias por confiar en FerrelonStock!

@@ -1,6 +1,6 @@
 import pytest
 from decimal import Decimal
-from django.test import Client
+from django.test import Client, override_settings
 from django.contrib.auth.models import User
 from shop.models import Category, Product
 from orders.models import Order, OrderItem, OrderMessage
@@ -162,3 +162,121 @@ class TestOrderViews:
         assert response.status_code == 302
         order = Order.objects.get(user=self.user)
         assert order.shipping_price == Decimal('0')
+
+
+@pytest.mark.django_db
+class TestOrderEmails:
+    def setup_method(self):
+        self.client = Client()
+        self.user = User.objects.create_user('emailbuyer', 'eb@test.com', 'pass123')
+
+    def _setup_cart_and_shipping(self):
+        cat = Category.objects.create(name='Test', slug='test-mail')
+        product = Product.objects.create(
+            name='Producto', slug='prod-mail', category=cat,
+            price=Decimal('10000'), stock=10, available=True,
+        )
+        ShippingZone.objects.create(name='CABA', code='caba', base_price=Decimal('2500'))
+        ShippingMethod.objects.create(
+            name='Envío estándar', code='standard', method_type='standard'
+        )
+        self.client.post(f'/cart/add/{product.pk}/', {'quantity': 1})
+        return product
+
+    def _checkout_post(self):
+        return self.client.post('/orders/checkout/', {
+            'first_name': 'Juan', 'last_name': 'Pérez',
+            'email': 'juan@test.com', 'address': 'Calle 123', 'city': 'CABA',
+            'shipping_method': 'standard', 'shipping_zone': 'caba',
+        })
+
+    def test_order_confirmation_email_sent_on_checkout(self, mailoutbox):
+        self.client.login(username='emailbuyer', password='pass123')
+        self._setup_cart_and_shipping()
+        response = self._checkout_post()
+        assert response.status_code == 302
+
+        order = Order.objects.get(user=self.user)
+        to_buyer = [m for m in mailoutbox if 'juan@test.com' in m.to]
+        assert len(to_buyer) == 1
+        assert f'Pedido #{order.pk} confirmado' in to_buyer[0].subject
+        # La alternativa HTML está presente
+        assert to_buyer[0].alternatives
+
+    @override_settings(NOTIFICATION_EMAIL='admin@ferrelonstock.com')
+    def test_new_order_admin_notification_sent(self, mailoutbox):
+        self.client.login(username='emailbuyer', password='pass123')
+        self._setup_cart_and_shipping()
+        response = self._checkout_post()
+        assert response.status_code == 302
+
+        to_admin = [m for m in mailoutbox if 'admin@ferrelonstock.com' in m.to]
+        assert len(to_admin) == 1
+        assert 'Nuevo pedido' in to_admin[0].subject
+
+    def test_no_admin_notification_when_not_configured(self, mailoutbox):
+        """Sin NOTIFICATION_EMAIL configurada no se envía nada al admin."""
+        self.client.login(username='emailbuyer', password='pass123')
+        self._setup_cart_and_shipping()
+        response = self._checkout_post()
+        assert response.status_code == 302
+        assert len(mailoutbox) == 1  # solo la confirmación al cliente
+
+    def test_payment_confirmation_email_sent(self, mailoutbox):
+        from payments.views import _mark_order_paid
+        order = Order.objects.create(
+            user=self.user, first_name='Juan', last_name='Pérez',
+            email='juan@test.com', address='Calle 123', city='CABA',
+            status='pending', payment_status='unpaid',
+        )
+        _mark_order_paid(order, 'stripe', 'pi_test_123')
+        order.refresh_from_db()
+        assert order.payment_status == 'paid'
+        assert any('Pago recibido' in m.subject for m in mailoutbox)
+
+    def test_status_change_sends_email(self, mailoutbox):
+        order = Order.objects.create(
+            user=self.user, first_name='Juan', last_name='Pérez',
+            email='juan@test.com', address='Calle 123', city='CABA',
+            status='pending',
+        )
+        assert len(mailoutbox) == 0  # crear el pedido no envía email
+
+        order.status = 'shipped'
+        order.save()
+
+        assert len(mailoutbox) == 1
+        assert 'cambió de estado' in mailoutbox[0].subject
+        assert 'Enviado' in mailoutbox[0].body
+
+    def test_status_change_to_pending_does_not_send_email(self, mailoutbox):
+        order = Order.objects.create(
+            user=self.user, first_name='Juan', last_name='Pérez',
+            email='juan@test.com', address='Calle 123', city='CABA',
+            status='preparing',
+        )
+        order.status = 'pending'
+        order.save()
+        assert len(mailoutbox) == 0
+
+    def test_no_email_on_order_creation(self, mailoutbox):
+        Order.objects.create(
+            user=self.user, first_name='Juan', last_name='Pérez',
+            email='juan@test.com', address='Calle 123', city='CABA',
+        )
+        assert len(mailoutbox) == 0
+
+    def test_email_failure_does_not_break_checkout(self, mailoutbox, monkeypatch):
+        from orders import emails as emails_module
+
+        def _boom(*args, **kwargs):
+            raise Exception('SMTP caído')
+
+        monkeypatch.setattr(emails_module.EmailMultiAlternatives, 'send', _boom)
+
+        self.client.login(username='emailbuyer', password='pass123')
+        self._setup_cart_and_shipping()
+        response = self._checkout_post()
+
+        assert response.status_code == 302
+        assert Order.objects.filter(user=self.user).exists()

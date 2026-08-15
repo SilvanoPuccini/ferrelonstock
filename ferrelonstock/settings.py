@@ -17,9 +17,20 @@ env = environ.Env(
 )
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'), overwrite=False) if os.path.exists(os.path.join(BASE_DIR, '.env')) else None
 
-SECRET_KEY = env('SECRET_KEY', default='unsafe-secret-key-change-in-production')
 DEBUG = env.bool('DEBUG', default=False)
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1', '.onrender.com'])
+
+# SECRET_KEY: en desarrollo local se tolera un default obvio, pero en
+# producción (DEBUG=False) es obligatoria y NUNCA puede quedar vacía.
+if DEBUG:
+    SECRET_KEY = env('SECRET_KEY', default='dev-only-insecure-key')
+else:
+    SECRET_KEY = env('SECRET_KEY', default='')
+    if not SECRET_KEY:
+        raise ImproperlyConfigured(
+            'SECRET_KEY no está definida. Configurá la variable de entorno '
+            'SECRET_KEY con un valor único y aleatorio antes de arrancar en producción.'
+        )
 
 # Application definition
 INSTALLED_APPS = [
@@ -163,8 +174,22 @@ LOGIN_URL = reverse_lazy('account_login')
 # Cart session key
 CART_SESSION_ID = 'cart'
 
-# Email (development - muestra emails en consola)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Email (transaccional vía SMTP; Brevo/Resend o cualquier proveedor SMTP)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = env('EMAIL_HOST', default='')
+EMAIL_PORT = env.int('EMAIL_PORT', default=587)
+EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
+EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='FerrelonStock <no-reply@ferrelonstock.com>')
+# Destinatario de notificaciones de pedidos nuevos (vacío = no se envían)
+NOTIFICATION_EMAIL = env('NOTIFICATION_EMAIL', default='')
+
+# Sin EMAIL_HOST configurado (desarrollo local): backend console para ver los
+# emails en la salida estándar. En producción sin EMAIL_HOST el envío degrada
+# con un warning en logs pero NUNCA rompe el checkout (ver orders/emails.py).
+if not EMAIL_HOST:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Stripe
 STRIPE_PUBLIC_KEY = env('STRIPE_PUBLIC_KEY', default='')
@@ -177,7 +202,7 @@ MP_ACCESS_TOKEN = env('MP_ACCESS_TOKEN', default='')
 MP_WEBHOOK_SECRET = env('MP_WEBHOOK_SECRET', default='')
 
 # Shipping webhook
-SHIPPING_WEBHOOK_SECRET = env('SHIPPING_WEBHOOK_SECRET', default='change-me')
+SHIPPING_WEBHOOK_SECRET = env('SHIPPING_WEBHOOK_SECRET', default='')
 
 # Cloudinary
 cloudinary.config(

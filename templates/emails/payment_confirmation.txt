@@ -1,0 +1,9 @@
+Hola {{ order.first_name }},
+
+¡Recibimos el pago de tu pedido #{{ order.pk }} por un total de ${{ total|floatformat:0 }}!
+
+Tu pedido ya está en preparación. Te vamos a avisar cuando esté listo para despacho.
+
+Seguí el estado de tu pedido en tu cuenta o respondé este correo para cualquier consulta.
+
+¡Gracias por tu compra!

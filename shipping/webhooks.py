@@ -10,11 +10,22 @@ from .models import Shipment, ShipmentEvent, Carrier
 
 
 def verify_webhook_secret(request):
-    """Verifica el token de autenticación del webhook."""
+    """Verifica el token de autenticación del webhook.
+
+    Fail-safe: si SHIPPING_WEBHOOK_SECRET está vacío (no configurado), el
+    webhook NUNCA autoriza — un secret vacío no debe aceptar requests.
+    """
+    expected = settings.SHIPPING_WEBHOOK_SECRET
+    if not expected:
+        return False
+
     token = request.headers.get('X-Webhook-Secret', '')
     if not token:
         token = request.GET.get('secret', '')
-    return token == settings.SHIPPING_WEBHOOK_SECRET
+    if not token:
+        return False
+
+    return hmac.compare_digest(token, expected)
 
 
 # =====================================================
