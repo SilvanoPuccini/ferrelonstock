@@ -126,6 +126,18 @@ else:
         'DATABASE_URL con la URL de tu base de datos antes de arrancar.'
     )
 
+# Cache compartida entre workers de gunicorn. LocMemCache (el default de
+# Django) es por proceso: con varios workers cada uno tendría su propio
+# contador y el rate limit de login se podría evadir. DatabaseCache usa la
+# misma DB de siempre (sin dependencias nuevas); la tabla la crea
+# `manage.py createcachetable` en build.sh.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'django_cache',
+    },
+}
+
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -168,6 +180,16 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 ACCOUNT_LOGIN_METHODS = {'email'}
+# Adapter custom: un fallo de SMTP NUNCA rompe el signup/login (el email de
+# confirmación se envía durante el registro; si Brevo falla, se loguea y el
+# flujo continúa en vez de explotar con 500).
+ACCOUNT_ADAPTER = 'accounts.adapters.AccountAdapter'
+# Rate limit de login (anti fuerza bruta): 5 intentos fallidos por email en
+# 5 minutos, con tope adicional por IP (10/min). Se apoya en la cache
+# compartida definida arriba (CACHES) para valer entre workers de gunicorn.
+ACCOUNT_RATE_LIMITS = {
+    'login_failed': '10/m/ip,5/300s/key',
+}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 # Verificación de email OBLIGATORIA: sin email confirmado el usuario no
 # puede iniciar sesión (filtro anti-estafas).

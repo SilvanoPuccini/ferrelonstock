@@ -1,6 +1,9 @@
+from decimal import Decimal, InvalidOperation
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView
 from django.db.models import Q
+from django.db.models.functions import Coalesce
 from django.contrib.postgres.search import TrigramSimilarity
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -14,6 +17,13 @@ class ProductListView(ListView):
     context_object_name = 'products'
     paginate_by = 12
 
+    SORT_ORDERINGS = {
+        'newest': '-created_at',
+        'price_asc': 'effective_price',
+        'price_desc': '-effective_price',
+        'name': 'name',
+    }
+
     def get_queryset(self):
         qs = Product.objects.filter(available=True).select_related('category', 'brand')
 
@@ -25,6 +35,18 @@ class ProductListView(ListView):
         if brand_slug:
             qs = qs.filter(brand__slug=brand_slug)
 
+        min_price = self.get_min_price()
+        max_price = self.get_max_price()
+        sort = self.get_sort()
+
+        # Filter and sort on the effective price (discount when present).
+        if min_price is not None or max_price is not None or sort in ('price_asc', 'price_desc'):
+            qs = qs.annotate(effective_price=Coalesce('discount_price', 'price'))
+            if min_price is not None:
+                qs = qs.filter(effective_price__gte=min_price)
+            if max_price is not None:
+                qs = qs.filter(effective_price__lte=max_price)
+
         q = self.request.GET.get('q', '').strip()
         if q:
             qs = qs.annotate(
@@ -33,7 +55,12 @@ class ProductListView(ListView):
             ).filter(
                 Q(name_sim__gt=0.1) | Q(brand_sim__gt=0.1) |
                 Q(name__icontains=q) | Q(brand__name__icontains=q)
-            ).order_by('-name_sim', '-brand_sim')
+            )
+
+        if sort:
+            qs = qs.order_by(self.SORT_ORDERINGS[sort])
+        elif q:
+            qs = qs.order_by('-name_sim', '-brand_sim')
 
         return qs
 
@@ -44,7 +71,34 @@ class ProductListView(ListView):
         context['current_category'] = self.kwargs.get('category_slug', '')
         context['current_brand'] = self.kwargs.get('brand_slug', '')
         context['search_query'] = self.request.GET.get('q', '')
+        context['min_price'] = self.get_min_price()
+        context['max_price'] = self.get_max_price()
+        context['sort'] = self.get_sort()
+        context['current_url'] = self.request.path
         return context
+
+    def get_sort(self):
+        sort = self.request.GET.get('sort', '')
+        return sort if sort in self.SORT_ORDERINGS else ''
+
+    def get_min_price(self):
+        if not hasattr(self, '_min_price'):
+            self._min_price = self._parse_decimal(self.request.GET.get('min_price'))
+        return self._min_price
+
+    def get_max_price(self):
+        if not hasattr(self, '_max_price'):
+            self._max_price = self._parse_decimal(self.request.GET.get('max_price'))
+        return self._max_price
+
+    @staticmethod
+    def _parse_decimal(raw):
+        if raw is None:
+            return None
+        try:
+            return Decimal(str(raw))
+        except (InvalidOperation, ValueError, TypeError):
+            return None
 
     def get_template_names(self):
         if self.request.headers.get('HX-Request'):
