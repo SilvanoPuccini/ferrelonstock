@@ -1,0 +1,5 @@
+Tu email principal de FerrelonStock cambió de {{ from_email }} a {{ to_email }}.
+
+Si no fuiste vos, contactanos de inmediato a info@ferrelonstock.com.
+
+— Equipo FerrelonStock

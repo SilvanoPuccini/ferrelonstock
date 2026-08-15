@@ -58,7 +58,7 @@ INSTALLED_APPS = [
     'cart',
     'orders',
     'payments',
-    'accounts',
+    'accounts.apps.AccountsConfig',
     'shipping',
 ]
 
@@ -166,7 +166,19 @@ AUTHENTICATION_BACKENDS = [
 ]
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
-ACCOUNT_EMAIL_VERIFICATION = 'optional'
+# Verificación de email OBLIGATORIA: sin email confirmado el usuario no
+# puede iniciar sesión (filtro anti-estafas).
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_UNIQUE_EMAIL = True
+# El link de confirmación expira en 3 días.
+ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
+# Al confirmar el email, el usuario queda logueado automáticamente.
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+# Notificaciones de allauth (cambio de password, email, etc.) activadas
+# para que los templates con branding realmente se envíen.
+ACCOUNT_EMAIL_NOTIFICATIONS = True
+# Sin prefijo "[Sitio]" en el subject: respeta los asuntos con marca.
+ACCOUNT_EMAIL_SUBJECT_PREFIX = ''
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 LOGIN_URL = reverse_lazy('account_login')

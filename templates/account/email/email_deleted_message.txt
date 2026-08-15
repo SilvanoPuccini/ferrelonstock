@@ -1,0 +1,5 @@
+El email {{ deleted_email }} fue eliminado de tu cuenta de FerrelonStock.
+
+Si no fuiste vos, contactanos a info@ferrelonstock.com.
+
+— Equipo FerrelonStock
