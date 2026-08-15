@@ -1,0 +1,9 @@
+Hola,
+
+Para confirmar tu nuevo email y mantener tu cuenta segura, hacé clic en el siguiente link:
+
+{{ activate_url }}
+
+Este link expira en 3 días. Si no pediste este cambio, ignorá este correo.
+
+— Equipo FerrelonStock

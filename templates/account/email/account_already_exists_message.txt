@@ -1,0 +1,14 @@
+Alguien intentó registrarse con el email {{ email }} en FerrelonStock, pero ya existe
+una cuenta con esa dirección.
+
+Si fuiste vos, iniciá sesión:
+
+{{ current_site.domain }}{% url 'account_login' %}
+
+¿Olvidaste tu contraseña? Podés restablecerla acá:
+
+{{ password_reset_url }}
+
+Si no fuiste vos, ignorá este correo.
+
+— Equipo FerrelonStock

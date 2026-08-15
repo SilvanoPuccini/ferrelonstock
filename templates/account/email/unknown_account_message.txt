@@ -1,0 +1,10 @@
+Alguien intentó usar el email {{ email }} en FerrelonStock, pero no tenemos ninguna
+cuenta registrada con esa dirección.
+
+Si fuiste vos, podés crear una cuenta nueva:
+
+{{ signup_url }}
+
+Si no fuiste vos, ignorá este correo.
+
+— Equipo FerrelonStock

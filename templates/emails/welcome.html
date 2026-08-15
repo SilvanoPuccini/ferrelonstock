@@ -1,0 +1,37 @@
+{% extends 'emails/email_base.html' %}
+{% block subject %}¡Bienvenido a FerrelonStock!{% endblock %}
+{% block content %}
+
+<h2 style="margin:0 0 12px;font-size:22px;color:#1c1917;">¡Bienvenido a FerrelonStock!</h2>
+<p style="margin:0 0 24px;color:#78716c;">
+    Hola <strong style="color:#1c1917;">{{ first_name }}</strong>, tu cuenta fue creada con éxito.
+    Ya podés explorar nuestra ferretería y corralón y encontrar todo lo que necesitás
+    para tus proyectos, con envío a todo el país.
+</p>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;background-color:#fff7ed;border:1px solid #fed7aa;border-left:4px solid #ea580c;border-radius:6px;">
+    <tr>
+        <td style="padding:14px 18px;">
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#9a3412;">
+                <strong>Tip:</strong> si todavía no confirmaste tu email, revisá tu casilla y
+                activá tu cuenta para empezar a comprar.
+            </p>
+        </td>
+    </tr>
+</table>
+
+<!-- CTA -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+        <td align="center" style="padding:8px 0 16px;">
+            <a href="{{ site_url }}"
+               style="display:inline-block;background-color:#ea580c;color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:bold;text-decoration:none;padding:12px 28px;border-radius:8px;">
+                Explorar la tienda
+            </a>
+        </td>
+    </tr>
+</table>
+
+<p style="margin:0;color:#a8a29e;font-size:12px;">¿Tenés dudas? Escribinos a info@ferrelonstock.com y te ayudamos.</p>
+
+{% endblock %}

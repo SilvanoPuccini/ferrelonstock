@@ -1,0 +1,9 @@
+Hola,
+
+Para activar tu cuenta y empezar a comprar, confirmá tu email con este link:
+
+{{ activate_url }}
+
+Este link expira en 3 días. Si no pediste crear esta cuenta, ignorá este correo.
+
+— Equipo FerrelonStock

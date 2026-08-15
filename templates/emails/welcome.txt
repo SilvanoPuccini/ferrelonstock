@@ -1,0 +1,16 @@
+¡Bienvenido a FerrelonStock!
+
+Hola {{ first_name }},
+
+Tu cuenta fue creada con éxito. Ya podés explorar nuestra ferretería y
+corralón y encontrar todo lo que necesitás para tus proyectos, con envío
+a todo el país.
+
+Explorar la tienda: {{ site_url }}
+
+Tip: si todavía no confirmaste tu email, revisá tu casilla y activá tu
+cuenta para empezar a comprar.
+
+¿Tenés dudas? Escribinos a info@ferrelonstock.com y te ayudamos.
+
+— Equipo FerrelonStock
