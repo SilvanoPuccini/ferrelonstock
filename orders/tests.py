@@ -4,6 +4,7 @@ from django.test import Client
 from django.contrib.auth.models import User
 from shop.models import Category, Product
 from orders.models import Order, OrderItem, OrderMessage
+from shipping.models import ShippingZone, ShippingMethod, ShippingConfig
 
 
 @pytest.mark.django_db
@@ -90,3 +91,74 @@ class TestOrderViews:
         self.client.login(username='orderview', password='pass123')
         response = self.client.get(f'/orders/{order.pk}/')
         assert response.status_code == 404
+
+    def _setup_cart_and_shipping(self):
+        cat = Category.objects.create(name='Test', slug='test-checkout')
+        product = Product.objects.create(
+            name='Producto', slug='prod-checkout', category=cat,
+            price=Decimal('10000'), stock=10, available=True,
+        )
+        zone = ShippingZone.objects.create(name='CABA', code='caba', base_price=Decimal('2500'))
+        method = ShippingMethod.objects.create(
+            name='Envío estándar', code='standard', method_type='standard'
+        )
+        self.client.post(f'/cart/add/{product.pk}/', {'quantity': 1})
+        return product, zone, method
+
+    def _checkout_post(self, **extra):
+        data = {
+            'first_name': 'Juan', 'last_name': 'Pérez',
+            'email': 'juan@test.com', 'address': 'Calle 123', 'city': 'CABA',
+            'shipping_method': 'standard', 'shipping_zone': 'caba',
+        }
+        data.update(extra)
+        return self.client.post('/orders/checkout/', data)
+
+    def test_checkout_ignores_manipulated_shipping_price_zero(self):
+        """Un shipping_price=0 forjado en el POST se ignora: se cobra el precio real."""
+        self.client.login(username='orderview', password='pass123')
+        product, zone, method = self._setup_cart_and_shipping()
+
+        response = self._checkout_post(shipping_price='0')
+
+        assert response.status_code == 302
+        order = Order.objects.get(user=self.user)
+        assert order.shipping_price == Decimal('2500')
+        assert order.shipping_method == method
+        assert order.shipping_zone == zone
+
+    def test_checkout_ignores_manipulated_shipping_price_negative(self):
+        """Un shipping_price negativo forjado se ignora: se cobra el precio real."""
+        self.client.login(username='orderview', password='pass123')
+        product, zone, method = self._setup_cart_and_shipping()
+
+        response = self._checkout_post(shipping_price='-100')
+
+        assert response.status_code == 302
+        order = Order.objects.get(user=self.user)
+        assert order.shipping_price == Decimal('2500')
+
+    def test_checkout_applies_free_shipping_threshold_server_side(self):
+        """El umbral de envío gratis se calcula en el servidor, no en el POST."""
+        self.client.login(username='orderview', password='pass123')
+        cat = Category.objects.create(name='Test', slug='test-free')
+        product = Product.objects.create(
+            name='Producto', slug='prod-free', category=cat,
+            price=Decimal('10000'), stock=10, available=True,
+        )
+        zone = ShippingZone.objects.create(name='CABA', code='caba', base_price=Decimal('2500'))
+        ShippingMethod.objects.create(
+            name='Envío estándar', code='standard', method_type='standard'
+        )
+        ShippingConfig.get_config()
+        config = ShippingConfig.get_config()
+        config.free_shipping_threshold = Decimal('40000')
+        config.save()
+        # 5 x 10000 = 50000 >= 40000 -> envío gratis
+        self.client.post(f'/cart/add/{product.pk}/', {'quantity': 5})
+
+        response = self._checkout_post(shipping_price='2500')
+
+        assert response.status_code == 302
+        order = Order.objects.get(user=self.user)
+        assert order.shipping_price == Decimal('0')

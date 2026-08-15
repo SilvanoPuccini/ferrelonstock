@@ -5,6 +5,7 @@ import dj_database_url
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
+from django.core.exceptions import ImproperlyConfigured
 from django.urls import reverse_lazy
 
 # Build paths
@@ -88,17 +89,30 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ferrelonstock.wsgi.application'
 
-DATABASES = {
-    'default': env.db('DATABASE_URL', default='postgres://ferrelon:ferrelon123@localhost:5432/ferrelonstock_db')
-}
+# La URL de la base de datos SIEMPRE viene de la variable de entorno.
+# Nunca se hardcodean credenciales en el código.
+DATABASE_URL = os.environ.get('DATABASE_URL', '')
 
-# Render provee DATABASE_URL automáticamente
-RENDER_DATABASE_URL = os.environ.get('DATABASE_URL')
-if RENDER_DATABASE_URL:
-    DATABASES['default'] = dj_database_url.config(
-        default=RENDER_DATABASE_URL,
-        conn_max_age=600,
-        conn_health_checks=True,
+if DATABASE_URL:
+    # Render/Neon u otro proveedor proveen DATABASE_URL automáticamente.
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+elif DEBUG:
+    # Desarrollo local sin credenciales (trust auth / socket local).
+    DATABASES = {
+        'default': dj_database_url.config(
+            default='postgres://ferrelon@localhost:5432/ferrelonstock_db'
+        )
+    }
+else:
+    raise ImproperlyConfigured(
+        'DATABASE_URL no está definida. Configurá la variable de entorno '
+        'DATABASE_URL con la URL de tu base de datos antes de arrancar.'
     )
 
 # Password validation
@@ -155,10 +169,12 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # Stripe
 STRIPE_PUBLIC_KEY = env('STRIPE_PUBLIC_KEY', default='')
 STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='')
+STRIPE_WEBHOOK_SECRET = env('STRIPE_WEBHOOK_SECRET', default='')
 
 # Mercado Pago
 MP_PUBLIC_KEY = env('MP_PUBLIC_KEY', default='')
 MP_ACCESS_TOKEN = env('MP_ACCESS_TOKEN', default='')
+MP_WEBHOOK_SECRET = env('MP_WEBHOOK_SECRET', default='')
 
 # Shipping webhook
 SHIPPING_WEBHOOK_SECRET = env('SHIPPING_WEBHOOK_SECRET', default='change-me')
