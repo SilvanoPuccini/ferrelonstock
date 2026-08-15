@@ -20,18 +20,15 @@ else:
     print('Superusuario ya existe')
 "
 
-# Cargar datos demo si no hay productos
+# Sincronizar datos demo (idempotente: actualiza existentes, no duplica)
 python manage.py shell -c "
 from shop.models import Product
-if Product.objects.count() == 0:
-    import subprocess
-    subprocess.call(['python', 'manage.py', 'load_demo_data'])
-    subprocess.call(['python', 'manage.py', 'load_brands'])
-    subprocess.call(['python', 'manage.py', 'load_shipping'])
-    subprocess.call(['python', 'manage.py', 'load_carriers'])
-    print('Datos demo cargados')
-else:
-    print(f'Ya hay {Product.objects.count()} productos')
+import subprocess
+subprocess.call(['python', 'manage.py', 'load_demo_data'])
+subprocess.call(['python', 'manage.py', 'load_brands'])
+subprocess.call(['python', 'manage.py', 'load_shipping'])
+subprocess.call(['python', 'manage.py', 'load_carriers'])
+print(f'Datos demo sincronizados ({Product.objects.count()} productos)')
 "
 
 # Asignar imágenes de Cloudinary
