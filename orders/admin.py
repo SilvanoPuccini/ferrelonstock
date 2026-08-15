@@ -72,6 +72,27 @@ def mark_cancelled(modeladmin, request, queryset):
     _change_status(queryset, 'cancelled')
 mark_cancelled.short_description = 'Marcar como cancelado'
 
+def send_test_email(modeladmin, request, queryset):
+    """Envía un email de prueba real (confirmación de pedido) para verificar
+    que el SMTP (Brevo) funciona desde el servidor desplegado. Va a
+    NOTIFICATION_EMAIL si está configurado, sino al email del pedido."""
+    from django.conf import settings
+    from django.contrib import messages
+    from .emails import send_order_confirmation
+
+    order = queryset.first()
+    if order is None:
+        messages.warning(request, 'Seleccioná un pedido para el envío de prueba.')
+        return
+
+    target = settings.NOTIFICATION_EMAIL or order.email
+    send_order_confirmation(order)
+    messages.success(
+        request,
+        f'Email de prueba enviado a {target}. Revisá la casilla (y el spam).'
+    )
+send_test_email.short_description = 'Enviar email de prueba (confirmacion de pedido)'
+
 def export_orders_csv(modeladmin, request, queryset):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="pedidos.csv"'
@@ -106,7 +127,7 @@ class OrderAdmin(ExportMixin, admin.ModelAdmin):
     readonly_fields = ['created_at', 'updated_at']
     inlines = [OrderItemInline, ShipmentInline, OrderMessageInline]
     list_per_page = 25
-    actions = [mark_preparing, mark_shipped, mark_delivered, mark_cancelled, export_orders_csv]
+    actions = [mark_preparing, mark_shipped, mark_delivered, mark_cancelled, export_orders_csv, send_test_email]
 
     def total_display(self, obj):
         return '${:,.0f}'.format(obj.total)
