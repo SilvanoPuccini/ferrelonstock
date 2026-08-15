@@ -6,6 +6,9 @@ pip install -r requirements.txt
 python manage.py collectstatic --noinput
 python manage.py migrate
 
+# Configurar el Site con el dominio real (links de emails apuntan bien)
+python manage.py ensure_site
+
 # Crear superusuario si no existe (requiere ADMIN_PASSWORD)
 python manage.py shell -c "
 import os

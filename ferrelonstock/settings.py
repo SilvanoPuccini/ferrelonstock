@@ -160,6 +160,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Django Allauth
 SITE_ID = 1
+# Dominio real usado por el Site (links absolutos de los emails).
+# En producción Render lo provee vía env; fallback al dominio público.
+SITE_DOMAIN = env('SITE_DOMAIN', default='ferrelonstock.onrender.com')
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
