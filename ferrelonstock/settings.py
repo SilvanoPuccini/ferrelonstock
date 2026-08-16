@@ -245,7 +245,7 @@ EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
 # y el blindaje de accounts/adapters.py + orders/emails.py la degrada a
 # warning sin romper el flujo.
 EMAIL_TIMEOUT = 10
-DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='FerrelonStock <no-reply@ferrelonstock.com>')
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='FerrelonStock <silvano.jm.puccini@gmail.com>')
 # Destinatario de notificaciones de pedidos nuevos (vacío = no se envían)
 NOTIFICATION_EMAIL = env('NOTIFICATION_EMAIL', default='')
 
