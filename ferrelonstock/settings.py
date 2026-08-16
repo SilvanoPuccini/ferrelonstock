@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.postgres',
     'django.contrib.sites',
+    'django.contrib.humanize',
     'import_export',
 
     # Third party
@@ -60,6 +61,8 @@ INSTALLED_APPS = [
     'payments',
     'accounts.apps.AccountsConfig',
     'shipping',
+    'wishlist',
+    'coupons',
 ]
 
 MIDDLEWARE = [
@@ -208,8 +211,9 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 LOGIN_URL = reverse_lazy('account_login')
 
-# Cart session key
+# Cart session keys
 CART_SESSION_ID = 'cart'
+COUPON_SESSION_ID = 'coupon'
 
 # Email (transaccional vía SMTP; Brevo/Resend o cualquier proveedor SMTP)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

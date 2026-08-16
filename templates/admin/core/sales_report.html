@@ -1,0 +1,102 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% load report_filters %}
+
+{% block title %}{{ title }} | {{ block.super }}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <p style="margin-bottom: 1rem;">
+        <a href="{% url 'admin:index' %}">{% trans "Inicio" %}</a> &rsaquo; {{ title }}
+    </p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+        <div class="module" style="padding: 1rem;">
+            <p style="color: var(--body-quiet-color); margin: 0 0 .25rem;">{% trans "Pedidos totales" %}</p>
+            <p style="font-size: 1.5rem; font-weight: bold; margin: 0;">{{ total_orders }}</p>
+        </div>
+        <div class="module" style="padding: 1rem;">
+            <p style="color: var(--body-quiet-color); margin: 0 0 .25rem;">{% trans "Pedidos pagados" %}</p>
+            <p style="font-size: 1.5rem; font-weight: bold; margin: 0;">{{ paid_orders_count }}</p>
+        </div>
+        <div class="module" style="padding: 1rem;">
+            <p style="color: var(--body-quiet-color); margin: 0 0 .25rem;">{% trans "Ingresos totales" %}</p>
+            <p style="font-size: 1.5rem; font-weight: bold; margin: 0;">${{ total_revenue|clp }}</p>
+        </div>
+        <div class="module" style="padding: 1rem;">
+            <p style="color: var(--body-quiet-color); margin: 0 0 .25rem;">{% trans "Ticket promedio" %}</p>
+            <p style="font-size: 1.5rem; font-weight: bold; margin: 0;">${{ avg_order_value|clp }}</p>
+        </div>
+    </div>
+
+    <div class="module" style="margin-bottom: 1.5rem;">
+        <h2>{% trans "Ventas por período" %}</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>{% trans "Período" %}</th>
+                    <th>{% trans "Pedidos" %}</th>
+                    <th>{% trans "Ingresos" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for period in periods %}
+                <tr>
+                    <td>{{ period.label }} <small>(desde {{ period.start|date:"d/m/Y" }})</small></td>
+                    <td>{{ period.count }}</td>
+                    <td>${{ period.revenue|clp }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="module" style="margin-bottom: 1.5rem;">
+        <h2>{% trans "Productos más vendidos" %}</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>{% trans "Producto" %}</th>
+                    <th>{% trans "Unidades vendidas" %}</th>
+                    <th>{% trans "Ingresos" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in top_products %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ product.product__name }}</td>
+                    <td>{{ product.quantity_sold }}</td>
+                    <td>${{ product.revenue|clp }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4">{% trans "Sin ventas todavía." %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="module">
+        <h2>{% trans "Ingresos diarios (últimos 14 días)" %}</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>{% trans "Fecha" %}</th>
+                    <th>{% trans "Ingresos" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for date, revenue in daily_revenue %}
+                <tr>
+                    <td>{{ date|date:"d/m/Y" }}</td>
+                    <td>${{ revenue|clp }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="2">{% trans "Sin datos." %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

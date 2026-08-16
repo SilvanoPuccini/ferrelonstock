@@ -198,7 +198,7 @@ class ProductAdmin(ImportExportModelAdmin):
 @admin.register(Review)
 class ReviewAdmin(ImportExportModelAdmin):
     resource_class = ReviewResource
-    list_display = ['product', 'user', 'rating', 'created_at']
-    list_filter = ['rating', 'created_at']
+    list_display = ['product', 'user', 'rating', 'verified_purchase', 'created_at']
+    list_filter = ['rating', 'verified_purchase', 'created_at']
     search_fields = ['product__name', 'user__email', 'comment']
     readonly_fields = ['created_at']

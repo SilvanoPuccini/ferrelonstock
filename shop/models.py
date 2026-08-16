@@ -122,6 +122,7 @@ class Review(models.Model):
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE, related_name='reviews', verbose_name='Usuario')
     rating = models.PositiveIntegerField('Valoración', choices=RATING_CHOICES)
     comment = models.TextField('Comentario', blank=True)
+    verified_purchase = models.BooleanField('Compra verificada', default=False)
     created_at = models.DateTimeField('Fecha', auto_now_add=True)
 
     class Meta:
@@ -129,6 +130,15 @@ class Review(models.Model):
         verbose_name_plural = 'Valoraciones'
         ordering = ['-created_at']
         unique_together = ['product', 'user']
+
+    @classmethod
+    def user_has_bought(cls, user, product):
+        from orders.models import OrderItem
+        return OrderItem.objects.filter(
+            order__user=user,
+            product=product,
+            order__payment_status='paid',
+        ).exists()
 
     def __str__(self):
         return f'{self.user.first_name or self.user.email} - {self.product.name} ({self.rating}/5)'

@@ -1,6 +1,7 @@
 from decimal import Decimal
 from django.conf import settings
 from shop.models import Product
+from coupons.models import Coupon
 
 
 class Cart:
@@ -81,4 +82,48 @@ class Cart:
 
     def clear(self):
         del self.session[settings.CART_SESSION_ID]
+        # El cupón vive en una key separada de sesión pero muere con el carrito.
+        if settings.COUPON_SESSION_ID in self.session:
+            del self.session[settings.COUPON_SESSION_ID]
         self.save()
+
+    def set_coupon(self, coupon):
+        """Stores an applied coupon in the session with its computed discount."""
+        self.session[settings.COUPON_SESSION_ID] = {
+            'coupon_id': coupon.id,
+            'code': coupon.code,
+            'discount': str(coupon.calculate_discount(self.get_total_price())),
+        }
+        self.save()
+
+    def get_coupon(self):
+        """Coupon info dict {'coupon', 'code', 'discount'} or None."""
+        data = self.session.get(settings.COUPON_SESSION_ID)
+        if not data:
+            return None
+        coupon = Coupon.objects.filter(pk=data.get('coupon_id')).first()
+        if coupon is None:
+            return None
+        return {
+            'coupon': coupon,
+            'code': coupon.code,
+            'discount': Decimal(data.get('discount', '0')),
+        }
+
+    def remove_coupon(self):
+        if settings.COUPON_SESSION_ID in self.session:
+            del self.session[settings.COUPON_SESSION_ID]
+            self.save()
+
+    def get_discount(self):
+        """Fresh discount against the current cart total; 0 when not applicable."""
+        data = self.get_coupon()
+        if not data:
+            return Decimal('0')
+        if not data['coupon'].is_valid_for(self.get_total_price()):
+            return Decimal('0')
+        return data['coupon'].calculate_discount(self.get_total_price())
+
+    def get_total_after_discount(self):
+        total = self.get_total_price() - self.get_discount()
+        return max(total, Decimal('0'))

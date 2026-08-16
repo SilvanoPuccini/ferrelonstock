@@ -1,0 +1,8 @@
+{% load i18n %}
+<span id="wishlist-toggle-{{ product.id }}"
+    hx-get="{% url 'wishlist:toggle_button' product.id %}"
+    hx-trigger="wishlistUpdated from:body"
+    hx-swap="outerHTML"
+    hx-target="this">
+    {% include 'wishlist/_toggle_button.html' %}
+</span>

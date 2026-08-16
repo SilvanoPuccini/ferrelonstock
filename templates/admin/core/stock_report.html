@@ -1,0 +1,58 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% load report_filters %}
+
+{% block title %}{{ title }} | {{ block.super }}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <p style="margin-bottom: 1rem;">
+        <a href="{% url 'admin:index' %}">{% trans "Inicio" %}</a> &rsaquo; {{ title }}
+    </p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+        <div class="module" style="padding: 1rem;">
+            <p style="color: var(--body-quiet-color); margin: 0 0 .25rem;">{% trans "Total de productos" %}</p>
+            <p style="font-size: 1.5rem; font-weight: bold; margin: 0;">{{ total_products }}</p>
+        </div>
+        <div class="module" style="padding: 1rem;">
+            <p style="color: var(--body-quiet-color); margin: 0 0 .25rem;">{% trans "Productos con stock bajo" %}</p>
+            <p style="font-size: 1.5rem; font-weight: bold; margin: 0;">{{ low_stock_count }}</p>
+        </div>
+    </div>
+
+    <form method="get" class="module" style="padding: 1rem; margin-bottom: 1.5rem;">
+        <label for="threshold">{% trans "Umbral de stock" %}:</label>
+        <input type="number" id="threshold" name="threshold" min="0" value="{{ threshold }}">
+        <button type="submit" class="button" style="margin-left: .5rem;">{% trans "Filtrar" %}</button>
+    </form>
+
+    <div class="module">
+        <h2>{% trans "Productos con stock menor o igual al umbral" %} ({{ low_stock_count }})</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>{% trans "Producto" %}</th>
+                    <th>{% trans "Categoría" %}</th>
+                    <th>{% trans "SKU" %}</th>
+                    <th>{% trans "Stock" %}</th>
+                    <th>{% trans "Precio" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in low_stock %}
+                <tr>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.category.name }}</td>
+                    <td>FS-{{ product.pk|stringformat:"05d" }}</td>
+                    <td style="{% if product.stock == 0 %}color:#d93025;font-weight:bold;{% endif %}">{{ product.stock }}</td>
+                    <td>${{ product.final_price|clp }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5">{% trans "No hay productos con stock bajo." %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

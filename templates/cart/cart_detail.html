@@ -65,32 +65,8 @@
             {% include '_includes/free_shipping_bar.html' %}
         </div>
 
-        <!-- Resumen -->
-        <div class="bg-white rounded-xl border border-gray-200 p-6">
-            <div class="flex justify-between items-center mb-2">
-                <span class="text-gray-600">{% trans "Subtotal" %} ({{ cart.get_total_items }} {% trans "items" %})</span>
-                <span class="font-semibold text-gray-900">${{ cart.get_total_price|floatformat:0 }}</span>
-            </div>
-            <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
-                <span class="text-gray-600">{% trans "Envío" %}</span>
-                {% if free_shipping_qualified %}
-                    <span class="text-sm font-bold text-green-600">{% trans "¡GRATIS!" %}</span>
-                {% else %}
-                    <span class="text-sm text-gray-500">{% trans "Se calcula en el checkout" %}</span>
-                {% endif %}
-            </div>
-            <div class="flex justify-between items-center mb-6">
-                <span class="text-lg font-bold text-gray-900">{% trans "Total" %}</span>
-                <span class="text-2xl font-bold text-primary-700">${{ cart.get_total_price|floatformat:0 }}</span>
-            </div>
-
-            <a href="{% url 'orders:checkout' %}" class="block w-full text-center bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition text-sm">
-                {% trans "Proceder al pago" %}
-            </a>
-            <a href="{% url 'shop:product_list' %}" class="block w-full text-center text-gray-500 hover:text-primary-600 py-3 text-sm mt-2">
-                {% trans "Seguir comprando" %}
-            </a>
-        </div>
+        <!-- Cupón + Resumen -->
+        {% include 'cart/_cart_totals.html' %}
     </div>
 
     {% else %}
