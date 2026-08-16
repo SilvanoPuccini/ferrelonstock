@@ -42,9 +42,14 @@ class Cart:
         self.session.modified = True
 
     def __iter__(self):
+        import copy
         product_ids = self.cart.keys()
         products = Product.objects.filter(id__in=product_ids)
-        cart = self.cart.copy()
+        # Deep copy: NUNCA mutar los items anidados de la sesión. La copia
+        # superficial dejaría 'price' como Decimal y el objeto Product dentro
+        # del dict de la sesión, que luego NO se puede serializar a JSON
+        # (TypeError: Object of type Decimal is not JSON serializable).
+        cart = copy.deepcopy(self.cart)
 
         for product in products:
             pid = str(product.id)

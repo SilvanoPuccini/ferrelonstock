@@ -138,6 +138,105 @@ class TestOrderViews:
         order = Order.objects.get(user=self.user)
         assert order.shipping_price == Decimal('2500')
 
+    def test_checkout_blocks_when_stock_insufficient(self):
+        """Si el stock bajó después de agregar al carrito, NO se crea el pedido."""
+        self.client.login(username='orderview', password='pass123')
+        cat = Category.objects.create(name='Test', slug='test-lowstock')
+        product = Product.objects.create(
+            name='Producto', slug='prod-lowstock', category=cat,
+            price=Decimal('10000'), stock=10, available=True,
+        )
+        zone = ShippingZone.objects.create(name='CABA', code='caba', base_price=Decimal('2500'))
+        ShippingMethod.objects.create(
+            name='Envío estándar', code='standard', method_type='standard'
+        )
+        self.client.post(f'/cart/add/{product.pk}/', {'quantity': 3})
+        # El stock baja a 1 después de que el carrito ya tenía 3.
+        Product.objects.filter(pk=product.pk).update(stock=1)
+
+        response = self._checkout_post()
+
+        assert response.status_code == 200
+        assert not Order.objects.filter(user=self.user).exists()
+        assert Product.objects.get(pk=product.pk).stock == 1  # sin stock negativo
+
+    def test_checkout_blocks_when_product_out_of_stock(self):
+        """Stock en cero: checkout bloqueado y el ítem se quita del carrito."""
+        self.client.login(username='orderview', password='pass123')
+        cat = Category.objects.create(name='Test', slug='test-ostock')
+        product = Product.objects.create(
+            name='Producto', slug='prod-ostock', category=cat,
+            price=Decimal('10000'), stock=10, available=True,
+        )
+        ShippingZone.objects.create(name='CABA', code='caba', base_price=Decimal('2500'))
+        ShippingMethod.objects.create(
+            name='Envío estándar', code='standard', method_type='standard'
+        )
+        self.client.post(f'/cart/add/{product.pk}/', {'quantity': 2})
+        Product.objects.filter(pk=product.pk).update(stock=0, available=False)
+
+        response = self._checkout_post()
+
+        assert response.status_code == 200
+        assert not Order.objects.filter(user=self.user).exists()
+        # El carrito quedó sin el ítem sin stock.
+        assert self.client.session.get('cart', {}) == {}
+
+    def test_checkout_succeeds_when_stock_exactly_enough(self):
+        """Stock exacto = checkout OK, stock a cero y producto no disponible."""
+        self.client.login(username='orderview', password='pass123')
+        cat = Category.objects.create(name='Test', slug='test-exact')
+        product = Product.objects.create(
+            name='Producto', slug='prod-exact', category=cat,
+            price=Decimal('10000'), stock=2, available=True,
+        )
+        ShippingZone.objects.create(name='CABA', code='caba', base_price=Decimal('2500'))
+        ShippingMethod.objects.create(
+            name='Envío estándar', code='standard', method_type='standard'
+        )
+        self.client.post(f'/cart/add/{product.pk}/', {'quantity': 2})
+
+        response = self._checkout_post()
+
+        assert response.status_code == 302
+        assert Order.objects.filter(user=self.user).exists()
+        product.refresh_from_db()
+        assert product.stock == 0
+        assert product.available is False
+
+    def test_race_conditional_update_blocks_oversell(self, monkeypatch):
+        """El decremento atómico (stock__gte) cierra la ventana TOCTOU."""
+        self.client.login(username='orderview', password='pass123')
+        cat = Category.objects.create(name='Test', slug='test-race')
+        product = Product.objects.create(
+            name='Producto', slug='prod-race', category=cat,
+            price=Decimal('10000'), stock=10, available=True,
+        )
+        ShippingZone.objects.create(name='CABA', code='caba', base_price=Decimal('2500'))
+        ShippingMethod.objects.create(
+            name='Envío estándar', code='standard', method_type='standard'
+        )
+        self.client.post(f'/cart/add/{product.pk}/', {'quantity': 2})
+
+        from orders import views as orders_views
+        original_filter = orders_views.Product.objects.filter
+
+        def fake_filter(*args, **kwargs):
+            qs = original_filter(*args, **kwargs)
+            # El decremento de stock (con stock__gte) simula que nadie pudo
+            # actualizar: la fila ya no está disponible.
+            if 'stock__gte' in kwargs:
+                return qs.none()
+            return qs
+
+        monkeypatch.setattr(orders_views.Product.objects, 'filter', fake_filter)
+
+        response = self._checkout_post()
+
+        assert response.status_code == 200
+        assert not Order.objects.filter(user=self.user).exists()
+        assert Product.objects.get(pk=product.pk).stock == 10  # sin descuento
+
     def test_checkout_applies_free_shipping_threshold_server_side(self):
         """El umbral de envío gratis se calcula en el servidor, no en el POST."""
         self.client.login(username='orderview', password='pass123')

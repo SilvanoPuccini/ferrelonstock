@@ -12,6 +12,33 @@ from shipping.models import ShippingMethod, ShippingZone
 from shipping.services import get_zones, calculate_shipping_price
 
 
+def _render_checkout(request, form, cart):
+    return render(request, 'orders/checkout.html', {
+        'form': form, 'cart': cart, 'zones': get_zones(),
+    })
+
+
+def _adjust_cart_to_stock_and_warn(request, cart, items):
+    """Clamp cart quantities to the real stock and warn the user.
+
+    Shared by the pre-check and the race-condition fallback so both paths
+    converge to the same user experience: warning + corrected cart + form
+    re-render. Never a 500, never a negative stock.
+    """
+    details = []
+    for item in items:
+        product = Product.objects.filter(pk=item['product'].pk).first()
+        name = item['product'].name
+        if product is None or product.stock <= 0:
+            cart.remove(item['product'])
+            available = 0
+        else:
+            cart.add(product=product, quantity=product.stock, override_quantity=True)
+            available = product.stock
+        details.append(f'"{name}" (disponibles: {available})')
+    messages.warning(request, _(f'No hay stock suficiente de {", ".join(details)}.'))
+
+
 @login_required
 def checkout(request):
     cart = Cart(request)
@@ -38,19 +65,44 @@ def checkout(request):
             order.shipping_zone = zone
             order.shipping_price = calculate_shipping_price(method, zone, cart.get_total_price())
 
+            # Pre-check: block checkout when the current stock can't cover the
+            # cart. Cart.__iter__ re-fetches products fresh from the DB, so
+            # item['product'].stock is the current committed value.
+            insufficient_items = [
+                item for item in cart
+                if item['quantity'] > item['product'].stock
+            ]
+            if insufficient_items:
+                _adjust_cart_to_stock_and_warn(request, cart, insufficient_items)
+                return _render_checkout(request, form, cart)
+
+            race_failed_items = []
+
             with transaction.atomic():
                 order.save()
 
                 for item in cart:
+                    product = item['product']
+                    # Atomic conditional decrement: the row is only updated when
+                    # there is enough stock, closing the TOCTOU window between
+                    # the pre-check above and this statement.
+                    updated = Product.objects.filter(
+                        pk=product.pk, stock__gte=item['quantity']
+                    ).update(stock=models.F('stock') - item['quantity'])
+
+                    if updated == 0:
+                        # Stock ran out between the pre-check and this update.
+                        # Roll back the whole transaction (order, items, profile)
+                        # and let the user retry with a corrected cart.
+                        race_failed_items.append(item)
+                        transaction.set_rollback(True)
+                        break
+
                     OrderItem.objects.create(
-                        order=order, product=item['product'],
+                        order=order, product=product,
                         price=item['price'], quantity=item['quantity']
                     )
-                    # Atomic stock deduction to prevent race conditions
-                    product = item['product']
-                    Product.objects.filter(pk=product.pk).update(
-                        stock=models.F('stock') - item['quantity']
-                    )
+
                     # Refresh and check if stock went to zero
                     product.refresh_from_db()
                     if product.stock <= 0:
@@ -58,24 +110,29 @@ def checkout(request):
                             stock=0, available=False
                         )
 
-                # Guardar datos en el perfil si están vacíos
-                profile = request.user.profile
-                if not profile.phone and order.phone:
-                    profile.phone = order.phone
-                if not profile.address and order.address:
-                    profile.address = order.address
-                if not profile.city and order.city:
-                    profile.city = order.city
-                if not profile.region and order.region:
-                    profile.region = order.region
-                if not profile.postal_code and order.postal_code:
-                    profile.postal_code = order.postal_code
-                profile.save()
+                if not race_failed_items:
+                    # Guardar datos en el perfil si están vacíos
+                    profile = request.user.profile
+                    if not profile.phone and order.phone:
+                        profile.phone = order.phone
+                    if not profile.address and order.address:
+                        profile.address = order.address
+                    if not profile.city and order.city:
+                        profile.city = order.city
+                    if not profile.region and order.region:
+                        profile.region = order.region
+                    if not profile.postal_code and order.postal_code:
+                        profile.postal_code = order.postal_code
+                    profile.save()
 
-                if not request.user.first_name and order.first_name:
-                    request.user.first_name = order.first_name
-                    request.user.last_name = order.last_name
-                    request.user.save()
+                    if not request.user.first_name and order.first_name:
+                        request.user.first_name = order.first_name
+                        request.user.last_name = order.last_name
+                        request.user.save()
+
+            if race_failed_items:
+                _adjust_cart_to_stock_and_warn(request, cart, race_failed_items)
+                return _render_checkout(request, form, cart)
 
             cart.clear()
 
@@ -99,9 +156,7 @@ def checkout(request):
         }
         form = CheckoutForm(initial=initial)
 
-    return render(request, 'orders/checkout.html', {
-        'form': form, 'cart': cart, 'zones': get_zones(),
-    })
+    return _render_checkout(request, form, cart)
 
 
 @login_required
