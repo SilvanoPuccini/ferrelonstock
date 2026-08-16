@@ -10,6 +10,7 @@ from cart.cart import Cart
 from shop.models import Product
 from shipping.models import ShippingMethod, ShippingZone
 from shipping.services import get_zones, calculate_shipping_price
+from coupons.models import Coupon
 
 
 def _render_checkout(request, form, cart):
@@ -65,6 +66,13 @@ def checkout(request):
             order.shipping_zone = zone
             order.shipping_price = calculate_shipping_price(method, zone, cart.get_total_price())
 
+            # Cupón de descuento: se persiste en el pedido solo si sigue siendo
+            # válido contra el total actual del carrito.
+            order.discount = cart.get_discount()
+            coupon_data = cart.get_coupon()
+            if coupon_data and order.discount > 0:
+                order.coupon = coupon_data['coupon']
+
             # Pre-check: block checkout when the current stock can't cover the
             # cart. Cart.__iter__ re-fetches products fresh from the DB, so
             # item['product'].stock is the current committed value.
@@ -111,6 +119,19 @@ def checkout(request):
                         )
 
                 if not race_failed_items:
+                    # Contador de usos del cupón: incremento atómico, capado en
+                    # max_uses para no superarlo si dos pedidos corren en paralelo.
+                    if order.coupon:
+                        if order.coupon.max_uses:
+                            Coupon.objects.filter(
+                                pk=order.coupon.pk,
+                                used_count__lt=order.coupon.max_uses,
+                            ).update(used_count=models.F('used_count') + 1)
+                        else:
+                            Coupon.objects.filter(pk=order.coupon.pk).update(
+                                used_count=models.F('used_count') + 1
+                            )
+
                     # Guardar datos en el perfil si están vacíos
                     profile = request.user.profile
                     if not profile.phone and order.phone:

@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from shop.models import Product
 from .emails import send_order_status_update
+from decimal import Decimal
 
 
 class Order(models.Model):
@@ -40,6 +41,10 @@ class Order(models.Model):
         'shipping.ShippingZone', on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Zona de envío'
     )
     shipping_price = models.DecimalField('Costo de envío', max_digits=10, decimal_places=2, default=0)
+    coupon = models.ForeignKey(
+        'coupons.Coupon', on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Cupón'
+    )
+    discount = models.DecimalField('Descuento', max_digits=10, decimal_places=2, default=0)
     created_at = models.DateTimeField('Fecha de creación', auto_now_add=True)
     updated_at = models.DateTimeField('Última actualización', auto_now=True)
 
@@ -81,7 +86,8 @@ class Order(models.Model):
     @property
     def total(self):
         items_total = sum(item.get_total for item in self.items.all())
-        return items_total + self.shipping_price
+        total = items_total + self.shipping_price - self.discount
+        return max(total, Decimal('0'))
 
     @property
     def total_items(self):

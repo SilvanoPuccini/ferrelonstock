@@ -3,7 +3,8 @@ from decimal import Decimal
 from django.test import Client
 from django.contrib.auth.models import User
 from django.urls import reverse
-from shop.models import Category, Brand, Product
+from shop.models import Category, Brand, Product, Review
+from orders.models import Order, OrderItem
 
 
 @pytest.mark.django_db
@@ -209,18 +210,69 @@ class TestReviewSubmit:
         )
         self.user = User.objects.create_user('tester', 'test@test.com', 'pass123')
 
+    def _make_buyer(self, payment_status='paid'):
+        order = Order.objects.create(
+            user=self.user, first_name='Juan', last_name='Pérez',
+            email='test@test.com', address='Calle 123', city='CABA',
+            payment_status=payment_status,
+        )
+        OrderItem.objects.create(
+            order=order, product=self.product,
+            price=self.product.price, quantity=1,
+        )
+        return order
+
     def test_review_requires_login(self):
         response = self.client.post(f'/shop/product/producto-rev/review/', {'rating': 5, 'comment': 'Genial'})
         assert response.status_code == 302  # Redirect to login
 
     def test_review_submit(self):
+        self._make_buyer()
         self.client.login(username='tester', password='pass123')
         response = self.client.post(f'/shop/product/producto-rev/review/', {'rating': 5, 'comment': 'Excelente'})
         assert response.status_code == 302
         assert self.product.reviews.count() == 1
 
     def test_review_duplicate_blocked(self):
+        self._make_buyer()
         self.client.login(username='tester', password='pass123')
         self.client.post(f'/shop/product/producto-rev/review/', {'rating': 5, 'comment': 'Primera'})
         self.client.post(f'/shop/product/producto-rev/review/', {'rating': 3, 'comment': 'Segunda'})
         assert self.product.reviews.count() == 1  # Solo la primera
+
+    def test_review_buyer_verified_purchase(self):
+        self._make_buyer()
+        self.client.login(username='tester', password='pass123')
+        self.client.post(f'/shop/product/producto-rev/review/', {'rating': 4, 'comment': 'Bueno'})
+        review = Review.objects.get(user=self.user, product=self.product)
+        assert review.verified_purchase is True
+
+    def test_review_non_buyer_blocked(self):
+        self.client.login(username='tester', password='pass123')
+        response = self.client.post(
+            f'/shop/product/producto-rev/review/', {'rating': 5, 'comment': 'Sin compra'}, follow=True
+        )
+        assert self.product.reviews.count() == 0
+        assert any(
+            'Solo los clientes que compraron este producto' in m.message
+            for m in response.context['messages']
+        )
+
+    def test_review_unpaid_order_blocked(self):
+        self._make_buyer(payment_status='unpaid')
+        self.client.login(username='tester', password='pass123')
+        self.client.post(f'/shop/product/producto-rev/review/', {'rating': 5, 'comment': 'No pagó'})
+        assert self.product.reviews.count() == 0
+
+    def test_review_detail_shows_purchase_gate(self):
+        self.client.login(username='tester', password='pass123')
+        response = self.client.get('/shop/product/producto-rev/')
+        content = response.content.decode()
+        assert 'Solo los clientes que compraron este producto' in content
+
+    def test_review_detail_shows_form_for_buyer(self):
+        self._make_buyer()
+        self.client.login(username='tester', password='pass123')
+        response = self.client.get('/shop/product/producto-rev/')
+        content = response.content.decode()
+        assert 'Dejá tu valoración' in content

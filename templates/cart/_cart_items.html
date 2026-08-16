@@ -49,9 +49,27 @@
 
 <!-- Total -->
 <div class="border-t border-gray-200 pt-4 mt-4">
+    <!-- Cupón -->
+    <form method="POST" action="{% url 'coupons:apply' %}"
+        hx-post="{% url 'coupons:apply' %}"
+        hx-swap="none">
+        {% csrf_token %}
+        <div class="flex gap-2 mb-3">
+            <input type="text" name="code" placeholder="{% trans 'Cupón' %}"
+                value="{% if cart.get_coupon %}{{ cart.get_coupon.code }}{% endif %}"
+                class="flex-grow px-3 py-2 border border-gray-300 rounded-lg text-sm">
+            <button type="submit" class="bg-gray-900 text-white text-sm px-4 rounded-lg font-semibold hover:bg-gray-800 transition">{% trans "Aplicar" %}</button>
+        </div>
+    </form>
+    {% if cart.get_coupon %}
+    <div class="flex items-center justify-between mb-2">
+        <span class="text-sm text-gray-600">{% trans "Cupón" %} {{ cart.get_coupon.code }}</span>
+        <span class="text-sm font-bold text-green-700">-${{ cart.get_discount|floatformat:0 }}</span>
+    </div>
+    {% endif %}
     <div class="flex justify-between items-center mb-4">
         <span class="font-semibold text-gray-900">{% trans "Total" %}</span>
-        <span class="text-xl font-bold text-primary-700">${{ cart.get_total_price|floatformat:0 }}</span>
+        <span class="text-xl font-bold text-primary-700">${{ cart.get_total_after_discount|floatformat:0 }}</span>
     </div>
     <a href="{% url 'cart:cart_detail' %}" class="block w-full text-center bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition text-sm">
         {% trans "Ver carrito completo" %}

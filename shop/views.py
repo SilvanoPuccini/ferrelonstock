@@ -7,8 +7,9 @@ from django.db.models.functions import Coalesce
 from django.contrib.postgres.search import TrigramSimilarity
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Product, Category, Brand
+from .models import Product, Category, Brand, Review
 from .forms import ReviewForm
+from wishlist.models import WishlistItem
 
 
 class ProductListView(ListView):
@@ -122,9 +123,14 @@ class ProductDetailView(DetailView):
         context['gallery'] = self.object.images.all()
         context['reviews'] = self.object.reviews.select_related('user')
         context['review_form'] = ReviewForm()
+        context['in_wishlist'] = False
         # Verificar si el usuario ya dejó review
         if self.request.user.is_authenticated:
+            context['in_wishlist'] = WishlistItem.objects.filter(
+                user=self.request.user, product=self.object
+            ).exists()
             context['user_has_reviewed'] = self.object.reviews.filter(user=self.request.user).exists()
+            context['user_has_bought'] = Review.user_has_bought(self.request.user, self.object)
         return context
 
 
@@ -136,12 +142,17 @@ def submit_review(request, slug):
         messages.warning(request, 'Ya dejaste una valoración para este producto.')
         return redirect('shop:product_detail', slug=slug)
 
+    if not Review.user_has_bought(request.user, product):
+        messages.warning(request, 'Solo los clientes que compraron este producto pueden dejar una valoración.')
+        return redirect('shop:product_detail', slug=slug)
+
     if request.method == 'POST':
         form = ReviewForm(request.POST)
         if form.is_valid():
             review = form.save(commit=False)
             review.product = product
             review.user = request.user
+            review.verified_purchase = True
             review.save()
             messages.success(request, 'Gracias por tu valoración.')
 
