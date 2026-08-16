@@ -223,8 +223,15 @@ LOGIN_URL = reverse_lazy('account_login')
 CART_SESSION_ID = 'cart'
 COUPON_SESSION_ID = 'coupon'
 
-# Email (transaccional vía SMTP; Brevo/Resend o cualquier proveedor SMTP)
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# Email (transaccional; Brevo)
+# Prioridad 1: API HTTP de Brevo (puerto 443, nunca bloqueada desde datacenters).
+# El SMTP de Brevo (587) bloquea a nivel TCP las IPs de datacenter (Render) y
+# el connect se cuelga -> worker muerto -> 500 (visto en producción).
+BREVO_API_KEY = env('BREVO_API_KEY', default='')
+if BREVO_API_KEY:
+    EMAIL_BACKEND = 'accounts.brevo_email_backend.BrevoEmailBackend'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = env('EMAIL_HOST', default='')
 EMAIL_PORT = env.int('EMAIL_PORT', default=587)
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
@@ -242,10 +249,12 @@ DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='FerrelonStock <no-reply@
 # Destinatario de notificaciones de pedidos nuevos (vacío = no se envían)
 NOTIFICATION_EMAIL = env('NOTIFICATION_EMAIL', default='')
 
-# Sin EMAIL_HOST configurado (desarrollo local): backend console para ver los
-# emails en la salida estándar. En producción sin EMAIL_HOST el envío degrada
-# con un warning en logs pero NUNCA rompe el checkout (ver orders/emails.py).
-if not EMAIL_HOST:
+# Sin EMAIL_HOST ni BREVO_API_KEY configurados (desarrollo local): backend
+# console para ver los emails en la salida estándar. En producción sin
+# proveedor el envío degrada con un warning en logs pero NUNCA rompe el
+# checkout (ver orders/emails.py). Con BREVO_API_KEY el backend de API tiene
+# prioridad y NUNCA se pisa.
+if not EMAIL_HOST and not BREVO_API_KEY:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Stripe
