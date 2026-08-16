@@ -40,7 +40,12 @@ def _send_email(subject, to_emails, template_name, context):
         )
         email.attach_alternative(html_body, 'text/html')
         email.send()
-    except Exception:
+    except BaseException:
+        # BaseException, NO Exception: un SMTP colgado sin timeout hace que
+        # gunicorn mate al worker con SystemExit, que NO hereda de Exception
+        # y escapa de `except Exception` → 500 en checkout. Con EMAIL_TIMEOUT
+        # el fallo normal es socket.timeout (Exception), pero esto garantiza
+        # que el checkout NUNCA explote por un email (visto en producción).
         logger.warning(
             'No se pudo enviar el email "%s" a %s',
             subject, to_emails, exc_info=True,
