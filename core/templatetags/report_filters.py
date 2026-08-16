@@ -5,9 +5,10 @@ register = template.Library()
 
 @register.filter
 def clp(value):
-    """Format a numeric value as CLP: integer with '.' thousands separator."""
+    """Format a numeric value as CLP: rounded integer with '.' thousands separator."""
     try:
-        value = int(value)
+        value = int(round(value))
     except (TypeError, ValueError):
         return value
-    return f'${value:,}'.replace(',', '.')
+    sign = '-' if value < 0 else ''
+    return f'{sign}${abs(value):,}'.replace(',', '.')

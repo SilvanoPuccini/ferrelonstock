@@ -137,3 +137,32 @@ class TestCouponCheckout:
         order = Order.objects.get(user=self.user)
         assert order.coupon is None
         assert order.discount == Decimal('0')
+
+    def test_coupon_used_once_per_user_dropped_on_second_checkout(self):
+        """El mismo cupón no se puede reusar: el segundo checkout lo descarta
+        en silencio (descuento 0, sin adjuntar) a pesar de aplicarlo en el carrito."""
+        coupon = _make_coupon()
+        self.client.login(username='couponbuyer', password='pass123')
+
+        # Primer pedido: el cupón se adjunta y descuenta.
+        self.client.post(f'/cart/add/{self.product.pk}/', {'quantity': 1})
+        self.client.post('/coupons/apply/', {'code': 'VERANO10'})
+        response = self._checkout_post()
+        assert response.status_code == 302
+        first = Order.objects.filter(user=self.user).order_by('pk').first()
+        assert first.coupon == coupon
+        assert first.discount == Decimal('1000')
+
+        # Segundo pedido con el mismo cupón: se descarta en el checkout.
+        self.client.post(f'/cart/add/{self.product.pk}/', {'quantity': 1})
+        self.client.post('/coupons/apply/', {'code': 'VERANO10'})
+        response = self._checkout_post()
+        assert response.status_code == 302
+
+        orders = Order.objects.filter(user=self.user).order_by('pk')
+        assert orders.count() == 2
+        second = orders[1]
+        assert second.coupon is None
+        assert second.discount == Decimal('0')
+        coupon.refresh_from_db()
+        assert coupon.used_count == 1  # el uso se contó una sola vez

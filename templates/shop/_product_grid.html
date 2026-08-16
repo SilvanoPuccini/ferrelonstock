@@ -35,23 +35,25 @@
 
 <!-- Paginación -->
 {% if is_paginated %}
+{% with base_query=request.GET.urlencode %}
 <nav class="flex justify-center mt-8 gap-2">
     {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition">{% trans "Anterior" %}</a>
+        <a href="?{% if base_query %}{{ base_query }}&{% endif %}page={{ page_obj.previous_page_number }}" class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition">{% trans "Anterior" %}</a>
     {% endif %}
 
     {% for num in page_obj.paginator.page_range %}
         {% if page_obj.number == num %}
             <span class="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium">{{ num }}</span>
         {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
-            <a href="?page={{ num }}" class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition">{{ num }}</a>
+            <a href="?{% if base_query %}{{ base_query }}&{% endif %}page={{ num }}" class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition">{{ num }}</a>
         {% endif %}
     {% endfor %}
 
     {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition">{% trans "Siguiente" %}</a>
+        <a href="?{% if base_query %}{{ base_query }}&{% endif %}page={{ page_obj.next_page_number }}" class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition">{% trans "Siguiente" %}</a>
     {% endif %}
 </nav>
+{% endwith %}
 {% endif %}
 
 {% else %}

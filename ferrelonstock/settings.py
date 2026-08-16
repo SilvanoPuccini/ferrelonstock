@@ -193,6 +193,14 @@ ACCOUNT_ADAPTER = 'accounts.adapters.AccountAdapter'
 ACCOUNT_RATE_LIMITS = {
     'login_failed': '10/m/ip,5/300s/key',
 }
+# Hay UN proxy de confianza: el edge de Render. Sin esto allauth tomaría
+# REMOTE_ADDR (la IP del edge) y TODOS los usuarios compartirían el mismo
+# bucket por-IP, así 10 logins fallidos bloquearían todo el sitio. Es seguro
+# porque ALLOWED_HOSTS está limitado a .onrender.com y la app solo es
+# alcanzable a través del edge de Render, que SOBREESCRIBE X-Forwarded-For.
+# NO usar ALLOWED_TRUSTED_CLIENT_IP_HEADER: cualquier cliente puede forjar
+# ese header y evadir el rate limit.
+ALLAUTH_TRUSTED_PROXY_COUNT = 1
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 # Verificación de email OBLIGATORIA: sin email confirmado el usuario no
 # puede iniciar sesión (filtro anti-estafas).

@@ -71,7 +71,19 @@ def checkout(request):
             order.discount = cart.get_discount()
             coupon_data = cart.get_coupon()
             if coupon_data and order.discount > 0:
-                order.coupon = coupon_data['coupon']
+                # Un cupón solo se puede usar UNA vez por usuario. El guard
+                # autoritativo vive acá (en el checkout), no en coupons/apply:
+                # si el usuario ya tiene un pedido con este cupón, se descarta
+                # silenciosamente (descuento 0, sin adjuntar) en vez de abusar
+                # del cupón en cada pedido.
+                already_used = Order.objects.filter(
+                    user=request.user, coupon_id=coupon_data['coupon'].pk
+                ).exists()
+                if already_used:
+                    order.discount = 0
+                    order.coupon = None
+                else:
+                    order.coupon = coupon_data['coupon']
 
             # Pre-check: block checkout when the current stock can't cover the
             # cart. Cart.__iter__ re-fetches products fresh from the DB, so

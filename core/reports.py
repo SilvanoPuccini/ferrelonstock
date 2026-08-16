@@ -31,7 +31,11 @@ def _period_stats(start, end):
         ).aggregate(total=Sum(LINE_TOTAL))['total'] or Decimal('0')
     )
     shipping_total = orders.aggregate(total=Sum('shipping_price'))['total'] or Decimal('0')
-    return {'count': orders.count(), 'revenue': items_total + shipping_total}
+    discount_total = orders.aggregate(total=Sum('discount'))['total'] or Decimal('0')
+    return {
+        'count': orders.count(),
+        'revenue': max(items_total + shipping_total - discount_total, Decimal('0')),
+    }
 
 
 @staff_member_required
@@ -49,7 +53,8 @@ def sales_report(request):
         .aggregate(total=Sum(LINE_TOTAL))['total'] or Decimal('0')
     )
     shipping_total = paid_orders.aggregate(total=Sum('shipping_price'))['total'] or Decimal('0')
-    total_revenue = items_total + shipping_total
+    discount_total = paid_orders.aggregate(total=Sum('discount'))['total'] or Decimal('0')
+    total_revenue = max(items_total + shipping_total - discount_total, Decimal('0'))
     avg_order_value = (
         total_revenue / paid_orders_count if paid_orders_count else Decimal('0')
     )
@@ -104,10 +109,21 @@ def sales_report(request):
         .annotate(rev=Sum('shipping_price'))
         .values_list('date', 'rev')
     )
-    for date, rev in list(daily_items) + list(daily_shipping):
+    daily_discounts = (
+        Order.objects.filter(
+            payment_status='paid',
+            created_at__date__gte=start_date,
+            created_at__date__lt=end_date,
+        )
+        .annotate(date=TruncDate('created_at'))
+        .values('date')
+        .annotate(rev=Sum('discount'))
+        .values_list('date', 'rev')
+    )
+    for date, rev in list(daily_items) + list(daily_shipping) + list(daily_discounts):
         day_revenue[date] = day_revenue.get(date, Decimal('0')) + (rev or Decimal('0'))
     daily_revenue = [
-        (start_date + timedelta(days=i), day_revenue.get(start_date + timedelta(days=i), Decimal('0')))
+        (start_date + timedelta(days=i), max(day_revenue.get(start_date + timedelta(days=i), Decimal('0')), Decimal('0')))
         for i in range(14)
     ]
 
