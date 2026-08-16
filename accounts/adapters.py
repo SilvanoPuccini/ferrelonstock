@@ -18,7 +18,11 @@ class AccountAdapter(DefaultAccountAdapter):
     def send_mail(self, template_prefix, email, context):
         try:
             super().send_mail(template_prefix, email, context)
-        except Exception:
+        except BaseException:
+            # BaseException, NO Exception: si el SMTP se cuelga sin timeout el
+            # worker de gunicorn recibe SIGTERM y el framework lanza SystemExit,
+            # que NO hereda de Exception. Sin esto el registro/login explotan
+            # con un 500 que escapa a todo blindaje (visto en producción).
             logger.warning(
                 'No se pudo enviar el email de allauth (%s) a %s',
                 template_prefix,

@@ -41,7 +41,11 @@ def send_welcome_email(user):
         )
         email.attach_alternative(html_body, 'text/html')
         email.send()
-    except Exception:
+    except BaseException:
+        # BaseException, NO Exception: un SMTP colgado + kill de gunicorn
+        # lanza SystemExit que escapa de `except Exception`. Capturarlo todo
+        # acá garantiza que el signup NUNCA explote por el email de bienvenida
+        # (ver traceback real en producción: accounts/emails.py -> SystemExit).
         logger.warning(
             'No se pudo enviar el email de bienvenida a %s',
             user.email,
