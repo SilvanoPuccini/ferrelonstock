@@ -379,3 +379,108 @@ class TestOrderEmails:
 
         assert response.status_code == 302
         assert Order.objects.filter(user=self.user).exists()
+
+
+@pytest.mark.django_db
+class TestRestock:
+    """FIX 2: the stock reserved at checkout is released when the order is
+    cancelled, its payment fails, or it is refunded."""
+
+    def setup_method(self):
+        self.client = Client()
+        self.user = User.objects.create_user('restock', 'rs@test.com', 'pass123')
+        self.cat = Category.objects.create(name='Test', slug='test-restock')
+        self.product = Product.objects.create(
+            name='Producto', slug='prod-restock', category=self.cat,
+            price=Decimal('10000'), stock=10, available=True,
+        )
+        ShippingZone.objects.create(name='CABA', code='caba', base_price=Decimal('2500'))
+        ShippingMethod.objects.create(
+            name='Envío estándar', code='standard', method_type='standard'
+        )
+
+    def _checkout(self, quantity=1):
+        """Real checkout: creates the order and decrements the stock."""
+        self.client.post(f'/cart/add/{self.product.pk}/', {'quantity': quantity})
+        return self.client.post('/orders/checkout/', {
+            'first_name': 'Juan', 'last_name': 'Pérez',
+            'email': 'juan@test.com', 'address': 'Calle 123', 'city': 'CABA',
+            'shipping_method': 'standard', 'shipping_zone': 'caba',
+        })
+
+    def test_restock_on_failed_payment(self):
+        """Pago fallido (webhook/helper): el stock vuelve al inventario."""
+        self.client.login(username='restock', password='pass123')
+        response = self._checkout(quantity=3)
+        assert response.status_code == 302
+
+        order = Order.objects.get(user=self.user)
+        self.product.refresh_from_db()
+        assert self.product.stock == 7
+        assert order.stock_restored is False
+
+        from payments.views import _mark_order_failed
+        _mark_order_failed(order, 'stripe', 'pi_fail')
+
+        order.refresh_from_db()
+        assert order.payment_status == 'failed'
+        assert order.stock_restored is True
+        self.product.refresh_from_db()
+        assert self.product.stock == 10
+        assert self.product.available is True
+
+    def test_restock_on_cancel(self):
+        """Pedido pagado y cancelado desde admin: el stock se libera igual."""
+        self.client.login(username='restock', password='pass123')
+        response = self._checkout(quantity=2)
+        assert response.status_code == 302
+
+        order = Order.objects.get(user=self.user)
+        order.payment_status = 'paid'
+        order.save(update_fields=['payment_status'])
+        self.product.refresh_from_db()
+        assert self.product.stock == 8
+
+        from orders.admin import mark_cancelled
+        mark_cancelled(None, None, Order.objects.filter(pk=order.pk))
+
+        order.refresh_from_db()
+        assert order.status == 'cancelled'
+        assert order.stock_restored is True
+        self.product.refresh_from_db()
+        assert self.product.stock == 10
+
+    def test_restock_idempotent(self):
+        """Llamar restock dos veces no duplica la restauración."""
+        self.client.login(username='restock', password='pass123')
+        response = self._checkout(quantity=2)
+        assert response.status_code == 302
+
+        order = Order.objects.get(user=self.user)
+        self.product.refresh_from_db()
+        assert self.product.stock == 8
+
+        order.restock()
+        order.restock()
+
+        order.refresh_from_db()
+        assert order.stock_restored is True
+        self.product.refresh_from_db()
+        assert self.product.stock == 10  # restaurado una sola vez
+
+    def test_restock_reflips_available_when_stock_back_above_zero(self):
+        """Stock a cero (available=False) se re-habilita al reponer stock."""
+        self.client.login(username='restock', password='pass123')
+        response = self._checkout(quantity=10)
+        assert response.status_code == 302
+
+        order = Order.objects.get(user=self.user)
+        self.product.refresh_from_db()
+        assert self.product.stock == 0
+        assert self.product.available is False
+
+        order.restock()
+
+        self.product.refresh_from_db()
+        assert self.product.stock == 10
+        assert self.product.available is True

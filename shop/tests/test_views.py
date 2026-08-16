@@ -178,6 +178,33 @@ class TestProductDetailView:
         response = self.client.get('/shop/product/no-disp/')
         assert response.status_code == 404
 
+    def test_detail_unavailable_404_for_logged_in_non_buyer(self):
+        non_buyer = User.objects.create_user('nobuy', 'nb@test.com', 'pass123')
+        Product.objects.create(
+            name='No comprado', slug='no-comprado-detail', category=self.cat,
+            price=Decimal('100'), stock=0, available=False
+        )
+        self.client.login(username='nobuy', password='pass123')
+        response = self.client.get('/shop/product/no-comprado-detail/')
+        assert response.status_code == 404
+
+    def test_detail_unavailable_visible_to_buyer(self):
+        buyer = User.objects.create_user('buyer', 'buyer@test.com', 'pass123')
+        sold_out = Product.objects.create(
+            name='Agotado', slug='agotado-detail', category=self.cat,
+            price=Decimal('100'), stock=0, available=False
+        )
+        order = Order.objects.create(
+            user=buyer, first_name='Juan', last_name='Pérez',
+            email='buyer@test.com', address='Calle 123', city='CABA',
+            payment_status='paid',
+        )
+        OrderItem.objects.create(order=order, product=sold_out, price=sold_out.price, quantity=1)
+        self.client.login(username='buyer', password='pass123')
+        response = self.client.get('/shop/product/agotado-detail/')
+        assert response.status_code == 200
+        assert 'Agotado' in response.content.decode()
+
 
 @pytest.mark.django_db
 class TestOffersView:
@@ -244,6 +271,17 @@ class TestReviewSubmit:
         self._make_buyer()
         self.client.login(username='tester', password='pass123')
         self.client.post(f'/shop/product/producto-rev/review/', {'rating': 4, 'comment': 'Bueno'})
+        review = Review.objects.get(user=self.user, product=self.product)
+        assert review.verified_purchase is True
+
+    def test_review_submit_after_sold_out(self):
+        self._make_buyer()
+        self.product.available = False
+        self.product.stock = 0
+        self.product.save()
+        self.client.login(username='tester', password='pass123')
+        response = self.client.post(f'/shop/product/producto-rev/review/', {'rating': 5, 'comment': 'Llegó tarde pero bien'})
+        assert response.status_code == 302
         review = Review.objects.get(user=self.user, product=self.product)
         assert review.verified_purchase is True
 

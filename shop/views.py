@@ -113,7 +113,16 @@ class ProductDetailView(DetailView):
     slug_url_kwarg = 'slug'
 
     def get_queryset(self):
-        return Product.objects.filter(available=True).select_related('category', 'brand')
+        qs = Product.objects.select_related('category', 'brand')
+        user = self.request.user
+        product = None
+        if user.is_authenticated:
+            product = qs.filter(slug=self.kwargs['slug']).first()
+        # Buyers keep access to the (possibly sold-out) product so they can
+        # submit their verified review; everyone else only sees available ones.
+        if not (product is not None and Review.user_has_bought(user, product)):
+            qs = qs.filter(available=True)
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -136,7 +145,7 @@ class ProductDetailView(DetailView):
 
 @login_required
 def submit_review(request, slug):
-    product = get_object_or_404(Product, slug=slug, available=True)
+    product = get_object_or_404(Product, slug=slug)
 
     if product.reviews.filter(user=request.user).exists():
         messages.warning(request, 'Ya dejaste una valoración para este producto.')

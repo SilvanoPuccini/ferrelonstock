@@ -69,7 +69,14 @@ def mark_delivered(modeladmin, request, queryset):
 mark_delivered.short_description = 'Marcar como entregado'
 
 def mark_cancelled(modeladmin, request, queryset):
-    _change_status(queryset, 'cancelled')
+    # Cancelar un pedido libera el stock reservado, SIN importar el estado de
+    # pago: un pedido pagado y luego cancelado igualmente devuelve la mercadería.
+    # Cada pedido se guarda individualmente para disparar el email y el
+    # restock (queryset.update() bypasea Order.save()).
+    for order in queryset:
+        order.status = 'cancelled'
+        order.save(update_fields=['status'])
+        order.restock()
 mark_cancelled.short_description = 'Marcar como cancelado'
 
 def send_test_email(modeladmin, request, queryset):

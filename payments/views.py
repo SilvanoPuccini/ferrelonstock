@@ -188,6 +188,28 @@ def _mark_order_paid(order, provider, transaction_id):
     send_payment_confirmation(order)
 
 
+def _mark_order_failed(order, provider=None, transaction_id=None):
+    """Marks an order's payment as failed and releases the reserved stock.
+
+    Provider/transaction are optional: the Stripe 'checkout.session.expired'
+    event has no payment object, so no Payment row is created there.
+    """
+    with transaction.atomic():
+        if provider:
+            Payment.objects.update_or_create(
+                order=order,
+                defaults={
+                    'provider': provider,
+                    'transaction_id': transaction_id or '',
+                    'status': 'failed',
+                    'amount': order.total,
+                }
+            )
+        order.payment_status = 'failed'
+        order.save(update_fields=['payment_status'])
+        order.restock()
+
+
 def _resolve_stripe_order(charge):
     """Resuelve el pedido asociado a un objeto Charge de Stripe."""
     metadata = charge.get('metadata') or {}
@@ -259,6 +281,8 @@ def stripe_webhook(request):
                 )
                 order.payment_status = 'refunded'
                 order.save(update_fields=['payment_status'])
+                # Refunded order: the goods stay with us, stock goes back.
+                order.restock()
     elif event_type == 'checkout.session.expired':
         metadata = data.get('metadata') or {}
         order_id = metadata.get('order_id')
@@ -268,8 +292,7 @@ def stripe_webhook(request):
             except (Order.DoesNotExist, ValueError):
                 return HttpResponse(status=200)
             if order.payment_status != 'paid':
-                order.payment_status = 'failed'
-                order.save(update_fields=['payment_status'])
+                _mark_order_failed(order)
 
     return HttpResponse(status=200)
 
@@ -344,17 +367,7 @@ def mp_webhook(request):
     if status == 'approved':
         _mark_order_paid(order, 'mercadopago', data_id)
     elif status in ('rejected', 'cancelled', 'charged_back'):
-        with transaction.atomic():
-            Payment.objects.update_or_create(
-                order=order,
-                defaults={
-                    'provider': 'mercadopago',
-                    'status': 'failed',
-                    'amount': order.total,
-                }
-            )
-            order.payment_status = 'failed'
-            order.save(update_fields=['payment_status'])
+        _mark_order_failed(order, 'mercadopago', data_id)
     elif status in ('pending', 'in_process', 'authorized'):
         with transaction.atomic():
             Payment.objects.update_or_create(

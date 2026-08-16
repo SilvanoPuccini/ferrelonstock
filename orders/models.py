@@ -47,6 +47,8 @@ class Order(models.Model):
     discount = models.DecimalField('Descuento', max_digits=10, decimal_places=2, default=0)
     created_at = models.DateTimeField('Fecha de creación', auto_now_add=True)
     updated_at = models.DateTimeField('Última actualización', auto_now=True)
+    # Stock released back to inventory on cancel/failed/refunded (idempotent guard).
+    stock_restored = models.BooleanField('Stock repuesto', default=False)
 
     class Meta:
         verbose_name = 'Pedido'
@@ -88,6 +90,29 @@ class Order(models.Model):
         items_total = sum(item.get_total for item in self.items.all())
         total = items_total + self.shipping_price - self.discount
         return max(total, Decimal('0'))
+
+    def restock(self):
+        """Restore product stock for this order.
+
+        Called when an order is cancelled, its payment fails, or it is
+        refunded: the goods are not going to the customer, so the reserved
+        stock goes back to inventory. Idempotent via the ``stock_restored``
+        flag: double delivery of the same webhook/action never double-restores.
+        """
+        if self.stock_restored:
+            return
+        for item in self.items.all():
+            product = Product.objects.filter(pk=item.product_id).first()
+            if product is None:
+                continue
+            Product.objects.filter(pk=item.product_id).update(
+                stock=models.F('stock') + item.quantity
+            )
+            product.refresh_from_db()
+            if product.stock > 0 and not product.available:
+                Product.objects.filter(pk=item.product_id).update(available=True)
+        self.stock_restored = True
+        self.save(update_fields=['stock_restored'])
 
     @property
     def total_items(self):

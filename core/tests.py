@@ -82,11 +82,12 @@ class TestSalesReport:
             price=Decimal('5000'), stock=10, available=True,
         )
 
-    def _make_order(self, user, payment_status='paid', shipping_price=0):
+    def _make_order(self, user, payment_status='paid', shipping_price=0, discount=0):
         order = Order.objects.create(
             user=user, first_name='Juan', last_name='Pérez',
             email='juan@test.com', address='Calle 123', city='CABA',
             payment_status=payment_status, shipping_price=Decimal(str(shipping_price)),
+            discount=Decimal(str(discount)),
         )
         OrderItem.objects.create(order=order, product=self.product_a, price=self.product_a.price, quantity=2)
         OrderItem.objects.create(order=order, product=self.product_b, price=self.product_b.price, quantity=1)
@@ -125,6 +126,24 @@ class TestSalesReport:
         response = self.client.get('/reports/sales/')
         content = response.content.decode()
         assert '27.500' in content  # 25000 + 2500 envío
+
+    def test_sales_report_subtracts_coupon_discount(self):
+        self._make_order(self.user, shipping_price=2500, discount=5000)
+        self.client.login(username='admin', password='pass123')
+        response = self.client.get('/reports/sales/')
+        content = response.content.decode()
+        assert response.status_code == 200
+        assert '22.500' in content  # 25000 + 2500 - 5000 descuento
+        assert '27.500' not in content
+        assert '25.000' not in content
+
+    def test_sales_report_discount_never_makes_revenue_negative(self):
+        self._make_order(self.user, discount=40000)
+        self.client.login(username='admin', password='pass123')
+        response = self.client.get('/reports/sales/')
+        content = response.content.decode()
+        assert response.status_code == 200
+        assert '$0' in content  # 25000 - 40000 clamped a 0
 
 
 @pytest.mark.django_db
