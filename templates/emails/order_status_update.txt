@@ -3,7 +3,8 @@ Hola {{ order.first_name }},
 El estado de tu pedido #{{ order.pk }} cambió.
 
 Nuevo estado: {{ status_display }}
-
-Podés seguir el estado de tu pedido en cualquier momento desde tu cuenta o con el número de seguimiento que te enviemos.
+{% if shipment %}Número de seguimiento: {{ shipment.tracking_number }}
+Seguimiento: {% url 'shipping:tracking' order.pk %}{% else %}
+Podés seguir el estado de tu pedido en cualquier momento desde tu cuenta o con el número de seguimiento que te enviemos.{% endif %}
 
 Ante cualquier duda, respondé este correo.

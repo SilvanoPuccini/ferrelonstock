@@ -63,8 +63,12 @@ class Order(models.Model):
 
         - No notifica en creación (el objeto todavía no existía).
         - No notifica si el nuevo estado es 'pending' (evita spam).
+        - ``send_status_email=False`` suprime la notificación de cambio de
+          estado: se usa cuando el cambio ya genera un email más específico
+          (por ejemplo, la confirmación de pago), evitando emails duplicados.
         - El email falla silencioso (warning en logs); nunca rompe el flujo.
         """
+        send_status_email = kwargs.pop('send_status_email', True)
         is_new = self._state.adding
         previous_status = None
         if not is_new:
@@ -75,7 +79,8 @@ class Order(models.Model):
         super().save(*args, **kwargs)
 
         if (
-            not is_new
+            send_status_email
+            and not is_new
             and previous_status is not None
             and previous_status != self.status
             and self.status != 'pending'

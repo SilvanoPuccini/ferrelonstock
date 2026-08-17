@@ -65,9 +65,17 @@ def send_payment_confirmation(order):
 
 
 def send_order_status_update(order):
-    """Email al cliente cuando cambia el estado de su pedido."""
+    """Email al cliente cuando cambia el estado de su pedido.
+
+    Si el pedido ya tiene un shipment, el contexto incluye el tracking number
+    y la URL del carrier para que el cliente pueda seguir el envío.
+    """
+    context = _order_context(order)
+    shipment = getattr(order, 'shipment', None)
+    context['shipment'] = shipment
+    context['carrier_tracking_url'] = shipment.tracking_url if shipment else ''
     subject = f'Tu pedido #{order.pk} cambió de estado'
-    _send_email(subject, [order.email], 'order_status_update', _order_context(order))
+    _send_email(subject, [order.email], 'order_status_update', context)
 
 
 def send_new_order_admin_notification(order):

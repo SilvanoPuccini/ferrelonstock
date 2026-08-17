@@ -93,7 +93,12 @@ def stripe_success(request, order_id):
             )
             order.status = 'preparing'
             order.payment_status = 'paid'
-            order.save()
+            # send_status_email=False: igual que _mark_order_paid, el email
+            # específico de pago (abajo) reemplaza al genérico de cambio de estado.
+            order.save(
+                update_fields=['status', 'payment_status'],
+                send_status_email=False,
+            )
             # Email al cliente (falla silencioso, nunca rompe el flujo).
             send_payment_confirmation(order)
             messages.success(request, _('¡Pago realizado con éxito!'))
@@ -182,7 +187,13 @@ def _mark_order_paid(order, provider, transaction_id):
         )
         order.status = 'preparing'
         order.payment_status = 'paid'
-        order.save(update_fields=['status', 'payment_status'])
+        # send_status_email=False: sin esto, Order.save() manda el email genérico
+        # "cambió de estado" y el cliente recibe DOS emails (ese + la confirmación
+        # de pago de abajo, que es el aviso correcto y específico).
+        order.save(
+            update_fields=['status', 'payment_status'],
+            send_status_email=False,
+        )
 
     # Email al cliente (falla silencioso, nunca rompe el webhook).
     send_payment_confirmation(order)
