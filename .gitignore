@@ -16,3 +16,4 @@ staticfiles/
 db.sqlite3
 *.log
 .atl/
+.windsurf/
