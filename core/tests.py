@@ -1,9 +1,11 @@
 import pytest
 from decimal import Decimal
-from django.test import Client
+from django.core.management import call_command
+from django.test import Client, override_settings
 from django.contrib.auth.models import User
 from core.models import Contact, TeamMember
 from shop.models import Category, Product
+from orders.emails import send_low_stock_notification
 from orders.models import Order, OrderItem
 
 
@@ -190,3 +192,47 @@ class TestStockReport:
         response = self.client.get('/reports/stock/', {'threshold': 'abc'})
         assert response.status_code == 200
         assert 'Bajo' in response.content.decode()
+
+
+@pytest.mark.django_db
+class TestLowStockNotification:
+    def setup_method(self):
+        self.cat = Category.objects.create(name='Test', slug='test-low-stock')
+        self.low = Product.objects.create(
+            name='Llave', slug='llave-low', category=self.cat,
+            price=Decimal('1000'), stock=1, available=True,
+        )
+
+    @override_settings(NOTIFICATION_EMAIL='admin@example.com')
+    def test_send_low_stock_notification_sends_email(self, mailoutbox):
+        products = Product.objects.filter(stock__lte=5)
+        send_low_stock_notification(products, 5)
+        assert len(mailoutbox) == 1
+        message = mailoutbox[0]
+        assert 'admin@example.com' in message.to
+        assert 'Stock bajo' in message.subject
+        # El nombre del producto aparece en el texto y en la alternativa HTML
+        assert 'Llave' in message.body
+        assert 'Llave' in message.alternatives[0][0]
+
+    @override_settings(NOTIFICATION_EMAIL='admin@example.com')
+    def test_command_sends_email_when_stock_low(self, mailoutbox):
+        call_command('send_low_stock_alerts')
+        assert len(mailoutbox) == 1
+        assert 'Stock bajo' in mailoutbox[0].subject
+
+    @override_settings(NOTIFICATION_EMAIL='admin@example.com')
+    def test_command_sends_no_email_when_nothing_low(self, mailoutbox):
+        self.low.stock = 50
+        self.low.save()
+        call_command('send_low_stock_alerts')
+        assert len(mailoutbox) == 0
+
+    @override_settings(NOTIFICATION_EMAIL='admin@example.com')
+    def test_command_threshold_zero_excludes_stock_one(self, mailoutbox):
+        call_command('send_low_stock_alerts', '--threshold', '0')
+        assert len(mailoutbox) == 0
+
+    def test_no_recipients_sends_nothing(self, mailoutbox):
+        send_low_stock_notification(Product.objects.all(), 5)
+        assert len(mailoutbox) == 0

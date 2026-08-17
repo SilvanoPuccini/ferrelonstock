@@ -1,0 +1,8 @@
+Alerta de stock bajo: {{ count }} producto(s) para reponer.
+
+Umbral: stock menor o igual a {{ threshold }} unidades.
+
+Productos:
+{% for product in products %}- {{ product.name }}{% if product.category %} ({{ product.category }}){% endif %} — stock: {{ product.stock }}
+{% endfor %}
+Ingresá al panel de administración para reponer el stock.

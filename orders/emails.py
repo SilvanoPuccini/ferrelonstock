@@ -90,3 +90,23 @@ def send_new_order_admin_notification(order):
         return
     subject = f'Nuevo pedido #{order.pk}'
     _send_email(subject, recipients, 'new_order_admin', _order_context(order))
+
+
+def send_low_stock_notification(products, threshold):
+    """Notificación al staff con los productos que tienen stock bajo.
+
+    products es un queryset ya filtrado con stock__lte=threshold. Usa
+    settings.NOTIFICATION_EMAIL (acepta varios separados por coma). Si no
+    está configurado, no envía nada.
+    """
+    raw = settings.NOTIFICATION_EMAIL or ''
+    recipients = [email.strip() for email in raw.split(',') if email.strip()]
+    if not recipients:
+        return
+    subject = f'Stock bajo: {len(products)} producto(s) para reponer'
+    context = {
+        'products': products,
+        'threshold': threshold,
+        'count': len(products),
+    }
+    _send_email(subject, recipients, 'low_stock_alert', context)
