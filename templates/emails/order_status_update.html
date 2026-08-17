@@ -26,10 +26,17 @@
             <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#292524;">
                 {% if order.status == 'shipped' %}<strong>¡Tu pedido está en camino!</strong>{% else %}<strong>¡Tu pedido fue entregado!</strong>{% endif %}
             </p>
+            {% if shipment %}
+            <p style="margin:6px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#78716c;">
+                Número de seguimiento: <strong style="color:#1c1917;">{{ shipment.tracking_number }}</strong>
+                {% if order.shipping_method %}<br>{{ order.shipping_method.name }}{% endif %}
+            </p>
+            {% else %}
             <p style="margin:6px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#78716c;">
                 {% if order.shipping_method %}{{ order.shipping_method.name }}{% endif %}
                 {% if order.shipping_zone %} — {{ order.shipping_zone.name }}{% endif %}
             </p>
+            {% endif %}
         </td>
     </tr>
 </table>
@@ -39,12 +46,18 @@
     Podés ver el detalle completo de tu pedido en cualquier momento desde tu cuenta.
 </p>
 
-<!-- CTA -->
+<!-- CTAs -->
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
     <tr>
         <td align="center" style="padding:8px 0 16px;">
+            {% if shipment %}
+            <a href="{% url 'shipping:tracking' order.pk %}"
+               style="display:inline-block;background-color:#ea580c;color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:bold;text-decoration:none;padding:12px 28px;border-radius:8px;margin-right:8px;">
+                Seguir mi envío
+            </a>
+            {% endif %}
             <a href="{% url 'orders:order_detail' order.pk %}"
-               style="display:inline-block;background-color:#ea580c;color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:bold;text-decoration:none;padding:12px 28px;border-radius:8px;">
+               style="display:inline-block;{% if shipment %}background-color:#ffffff;color:#ea580c;border:1px solid #ea580c;{% else %}background-color:#ea580c;color:#ffffff;{% endif %}font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:bold;text-decoration:none;padding:12px 28px;border-radius:8px;">
                 Ver mi pedido
             </a>
         </td>
