@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load account %}
+{% load allauth %}
+
+{% block title %}{% trans "Confirmá tu email" %}{% endblock %}
+
+{% block content %}
+<div class="min-h-[70vh] flex items-center justify-center px-4">
+    <div class="w-full max-w-md">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+            <div class="text-center mb-8">
+                <h1 class="text-2xl font-bold text-gray-900">{% trans "Confirmá tu email" %}</h1>
+            </div>
+
+            {% if confirmation %}
+                {% user_display confirmation.email_address.user as user_display %}
+                {% if can_confirm %}
+                    <p class="text-gray-500 text-sm text-center">
+                        {% blocktrans with confirmation.email_address.email as email %}Confirmá que {{ email }} es una dirección de correo electrónico de {{ user_display }}.{% endblocktrans %}
+                    </p>
+
+                    {% url 'account_confirm_email' confirmation.key as action_url %}
+                    <form method="POST" action="{{ action_url }}" class="mt-6 space-y-5">
+                        {% csrf_token %}
+                        {{ redirect_field }}
+                        <button type="submit"
+                            class="w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition text-sm">
+                            {% trans "Confirmar" %}
+                        </button>
+                    </form>
+                {% else %}
+                    <p class="text-gray-500 text-sm text-center">{% trans "No podemos confirmar esta dirección de correo electrónico porque ya fue confirmada por otra cuenta." %}</p>
+                {% endif %}
+            {% else %}
+                {% url 'account_email' as email_url %}
+                <p class="text-gray-500 text-sm text-center">{% trans "Este link de confirmación de email expiró o es inválido. Solicitá uno nuevo para continuar." %}</p>
+                <div class="mt-4 text-center text-sm">
+                    <a href="{{ email_url }}" class="text-primary-600 hover:text-primary-700 font-medium">{% trans "Solicitar un nuevo email de confirmación" %}</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
